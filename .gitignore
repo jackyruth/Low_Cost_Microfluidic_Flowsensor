@@ -1,0 +1,16 @@
+workspace/zephyr/
+workspace/.west/
+workspace/modules/
+workspace/tools/
+workspace/bootloader/
+workspace/microvalve/build/
+workspace/build
+
+!workspace/zephyr/boards/arm/custom_breakout
+
+[Bb][Uu][Ii][Ll][Dd]
+
+**/.vscode/**
+**.vscode/
+
+*.code-workspace

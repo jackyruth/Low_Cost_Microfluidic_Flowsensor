@@ -1,0 +1,22 @@
+&i2c1 {
+	status = "okay";
+	ti_tmp116: ti_tmp116@48 {
+		compatible = "ti,tmp116";
+		reg = <0x48>;
+		status = "okay";
+		label = "TMP116";
+	};
+};
+/ {
+	hbridge {
+		compatible = "gpio-leds";
+		out1_in1: in1_a1 {
+			gpios = <&gpiob 5 GPIO_ACTIVE_HIGH>;
+			label = "HBridge IN1A1";
+		};
+		out1_in2: in2_a2 {
+			gpios = <&gpiob 4 GPIO_ACTIVE_HIGH>;
+			label = "HBridge IN2A2";
+		};
+	};
+};

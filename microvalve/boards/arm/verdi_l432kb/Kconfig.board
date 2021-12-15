@@ -1,0 +1,3 @@
+config BOARD_VERDI_L432KB
+    bool "Verdi L432KB Breakout Board"
+    depends on SOC_STM32L432XX

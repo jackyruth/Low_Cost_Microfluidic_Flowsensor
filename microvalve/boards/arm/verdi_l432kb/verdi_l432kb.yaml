@@ -1,0 +1,18 @@
+identifier: verdi_l432kb
+name: Verdi-L432KB
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+  - xtools
+ram: 64
+flash: 128
+supported:
+  - nvs
+  - pwm
+  - can
+  - counter
+  - spi
+  - rtc
+  - gpio
