@@ -5,6 +5,11 @@ workspace/tools/
 workspace/bootloader/
 workspace/microvalve/build/
 workspace/build
+.west/
+bootloader/
+modules/
+tools/
+zephyr/
 
 !workspace/zephyr/boards/arm/custom_breakout
 

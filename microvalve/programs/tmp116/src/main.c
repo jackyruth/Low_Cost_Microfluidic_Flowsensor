@@ -33,8 +33,8 @@
 #define OUT1IN2_FLAGS	DT_GPIO_FLAGS(OUT1IN2_NODE, gpios)
 
 /* Delay roughly in 100 ms */
-#define DELAY_A 100
-#define DELAY_B DELAY_A + 5
+#define T_ON 5            //0.5 sec
+#define T_OFF T_ON + 100  //10 sec
 
 // Zephyr Sensor Def
 #define TMP117_0x48 true
@@ -146,15 +146,17 @@ void main(void)
 	}
 	counter = 0;
 	while (1) {
-		if(counter == DELAY_A){
+		if(counter == 0){
         		gpio_pin_set(led_pin, LED0_PIN, true);
 			gpio_pin_set(out1_in2, OUT1IN2_PIN, true);
 			heat_sig = 100;
 		}
-		else if(counter == DELAY_B){
+		else if(counter == T_ON){
         		gpio_pin_set(led_pin, LED0_PIN, false);
 			gpio_pin_set(out1_in2, OUT1IN2_PIN, false);
 			heat_sig = 0;
+		}
+		else if(counter == T_OFF){
 			counter = 0;
 		}
         	code = i2c_burst_read(i2c, TMP117_ADDR, TEMP_RSLT, &temp, 2);
@@ -175,8 +177,7 @@ void main(void)
 				return;
 			}
 		}
-		//printk("%u %d.%d %d\n", k_uptime_get_32(), temp_value.val1, temp_value.val2, heat_sig);
-		printk("%d.%d %d\n", temp_value.val1, temp_value.val2, heat_sig);
+		printk("%d.%d %d.%d %d\n", temp_value.val1, temp_value.val2, tmp/1000000, tmp%1000000, heat_sig);
 		counter++;
 		k_msleep(100);
 	}
