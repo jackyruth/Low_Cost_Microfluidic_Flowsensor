@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name flowsensor)(type Legacy)(uri ${KIPRJMOD}/flowsensor.lib)(options "")(descr ""))
+)

@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name flowmeter)(type KiCad)(uri ${KIPRJMOD}/flowmeter.pretty)(options "")(descr ""))
+  (lib (name flowsensor)(type KiCad)(uri ${KIPRJMOD}/flowsensor.pretty)(options "")(descr ""))
+)

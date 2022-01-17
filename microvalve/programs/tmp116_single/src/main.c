@@ -33,16 +33,18 @@
 #define OUT1IN2_FLAGS	DT_GPIO_FLAGS(OUT1IN2_NODE, gpios)
 
 /* Delay roughly in 100 ms */
-#define T_ON 1            //0.5 sec
-#define T_OFF 80  //10 sec
+#define T_ON  100   //0.5 sec
+#define T_OFF 10000  //10 sec
 
 // Zephyr Sensor Def
-#define TMP117_0x48 true
 #define I2C_DEV DT_LABEL(DT_ALIAS(i2c))
+
+// Register Values
+#define TEMP_CFG_VAL 0x00
 
 // Custom Driver Addresses
 #define TMP117_RESOLUTION 78125
-#define TMP117_ADDR 	0x49
+#define TMP117_ADDR 	0x48
 #define TEMP_RSLT 	0x00
 #define TEMP_CFG  	0x01
 #define TEMP_THighLimit 0x02
@@ -73,7 +75,9 @@
 uint8_t tx_byte;
 uint8_t rx_bytes[6];
 int16_t serial_num;
+int16_t config;
 int16_t temp;
+uint32_t prev_time;
 const struct device *i2c;
 int code;
 int counter;
@@ -128,19 +132,22 @@ void main(void)
 	gpio_pin_set(out1_in2, OUT1IN2_PIN, false);
 
 //-- I2C Device
-	if(TMP117_0x48){
-		dev = device_get_binding(DT_LABEL(DT_INST(0, ti_tmp116)));
-		__ASSERT(dev != NULL, "Failed to get TMP116 device binding");
-		printk("Device %s - %p is ready\n", dev->name, dev);
-		offset_value.val1 = 0;
-		offset_value.val2 = 0;
-		ret = sensor_attr_set(dev, SENSOR_CHAN_AMBIENT_TEMP,
-			      	SENSOR_ATTR_OFFSET, &offset_value);
-		if (ret) {
-			printk("sensor_attr_set failed ret = %d\n", ret);
-			printk("SENSOR_ATTR_OFFSET is only supported by TMP117\n");
-		}
-	}
+	i2c = device_get_binding(I2C_DEV);
+
+	// Read TMP117 DEVID 
+        code = i2c_burst_read(i2c, TMP117_ADDR, TEMP_DEVID, &serial_num, 2);
+        __ASSERT(code == 0, "ERROR: i2c_read, exit with code %u\n", code);
+	
+	/* === Setup TMP117 === */
+	config = sys_cpu_to_be16(TEMP_CFG_VAL);
+	code = i2c_burst_write(i2c, TMP117_ADDR, TEMP_CFG, &config, 2);
+        __ASSERT(code == 0, "ERROR: i2c_read, exit with code %u\n", code);
+	
+	code = i2c_burst_read(i2c, TMP117_ADDR, TEMP_CFG, &config, 2);
+        __ASSERT(code == 0, "ERROR: i2c_read, exit with code %u\n", code);
+	config = sys_be16_to_cpu(config);
+	printk("NEW CONFIG: %d\r\n", config);
+
 	counter = 0;
 	while (1) {
 		if(counter == 1){
@@ -148,31 +155,22 @@ void main(void)
 			gpio_pin_set(out1_in2, OUT1IN2_PIN, true);
 			heat_sig = 100;
 		}
-		else if(counter == T_ON+1){
+		else if(counter == (T_ON+1)/16){
         		gpio_pin_set(led_pin, LED0_PIN, false);
 			gpio_pin_set(out1_in2, OUT1IN2_PIN, false);
 			heat_sig = 0;
 		}
-		else if(counter == T_OFF+T_ON+1){
+		else if(counter == (T_OFF+T_ON+1)/16){
 			counter = 0;
 		}
 		counter++;
-
-		if(TMP117_0x48){
-			ret = sensor_sample_fetch(dev);
-			if (ret) {
-				printk("Failed to fetch measurements (%d)\n", ret);
-				return;
-			}
-
-			ret = sensor_channel_get(dev, SENSOR_CHAN_AMBIENT_TEMP,
-					 &temp_value);
-			if (ret) {
-				printk("Failed to get measurements (%d)\n", ret);
-				return;
-			}
-		}
-		printk("%d.%d %d\n", temp_value.val1, temp_value.val2,heat_sig);
-		k_msleep(100);
+		prev_time = k_uptime_get_32();
+        	code = i2c_burst_read(i2c, TMP117_ADDR, TEMP_RSLT, &temp, 2);
+        	__ASSERT(code == 0, "ERROR: i2c_read, exit with code %u\n", code);
+		temp = sys_be16_to_cpu(temp);
+		tmp = ((int16_t)temp * (int32_t)TMP117_RESOLUTION) / 10;
+		while(k_uptime_get_32()-prev_time<15);
+		printk("%u %d.%d %d\n", k_uptime_get_32(), tmp/1000000, tmp%1000000, heat_sig);
+		// printk("%d.%d %d\n", tmp/1000000, tmp%1000000, heat_sig);
 	}
 }

@@ -1,6 +1,31 @@
 from scipy.interpolate import CubicSpline
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
+
+x_time = []
+temp   = []
+heater = []
+
+first_heater = False
+for line in sys.stdin:
+    data = line.strip().split(' ')
+    if(len(data) == 3):
+        if(int(data[2])== 100):
+            first_heater = True
+        if(first_heater):
+            x_time.append(int(data[0]))
+            temp.append(float(data[1]))
+            heater.append(int(data[2]))
+    else:
+        print(data)
+
+plt.plot(x_time, temp, label = "temp")
+plt.plot(x_time, heater, label = "heater")
+plt.show()
+
+
+
 '''
 no_timestamp = "500uL_per_min_100ms.txt"
 # no_timestamp = "1.txt"
@@ -26,8 +51,7 @@ x_new = np.linspace(0,x_axis[-1],(x_axis[-1]+1)//20)
 y_new = f(x_new)
 plt.plot(x_new, y_new, label = "heater")
 plt.show()
-'''
-with open("500uL_per_min.txt", "r") as fp:
+with open("10.txt", "r") as fp:
     data = fp.readlines()
 
 x_axis = []
@@ -48,3 +72,4 @@ x_new = np.linspace(0,x_axis[-1],(x_axis[-1]+1)//1000)
 y_new = f(x_new)
 plt.plot(x_new, y_new, label = "heater")
 plt.show()
+'''
