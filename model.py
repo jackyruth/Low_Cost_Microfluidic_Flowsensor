@@ -5,9 +5,9 @@ delta_t = 17
 
 # units are W, mm, s, K
 thermal_conductivity = 0.598/1000 # W/mm*K @ 20 degrees
-thermal_diffusivity  = 0.143 # mm^2/s @ 25 degrees
+thermal_diffusivity  = 0.143/1000 # mm^2/s @ 25 degrees
 signal_strength      = 38
-distance_from_heater = 5 # mm
+distance_from_heater = 2 # mm
 speed                = 0.83 # mm/s
 
 def funk(t, q, v):
@@ -19,9 +19,9 @@ def funk(t, q, v):
 
 
 if (__name__ == "__main__"):
-    t_list = [delta_t*i/1000 for i in range(1,588)]
+    t_list = [delta_t*i for i in range(1,2000)]
     rslt = []
     for t in t_list: 
-        rslt.append(funk(t, 1, 1))
+        rslt.append(funk(t, 50, 0.0002))
     plt.plot(t_list,rslt)
     plt.show()
