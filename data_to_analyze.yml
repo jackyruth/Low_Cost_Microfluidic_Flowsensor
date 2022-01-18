@@ -1,0 +1,13 @@
+data_path: data/
+data_files:
+        # - 10.txt
+        # - 20.txt
+        - 40.txt
+        - 60.txt
+        - 80.txt
+        # - 30_farsensor.txt
+        - 40_farsensor.txt
+        # - 50_farsensor.txt
+        - 60_farsensor.txt
+        # - 70_farsensor.txt
+        - 80_farsensor.txt

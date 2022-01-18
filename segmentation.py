@@ -6,9 +6,10 @@ import model as md
 segment_length = 10000 # milliseconds
 delta_t = 17 # milliseconds
 max_delta_t = 18 # milliseconds
-flowrate_data = ["10","20","40","60","80"]
+# flowrate_data = ["10","20","40","60","80"]
+flowrate_data = ["70","80"]
 for flowrate in flowrate_data:
-    with open("data/"+flowrate+".txt","r") as fp:
+    with open("data/"+flowrate+"_farsensor.txt","r") as fp:
         datalist = fp.read().strip().split("\n")
 
     sync = False
