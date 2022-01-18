@@ -40,11 +40,13 @@
 #define I2C_DEV DT_LABEL(DT_ALIAS(i2c))
 
 // Register Values
-#define TEMP_CFG_VAL 0x00
+#define TEMP_CFG_VAL 0x00 //0x220 is default
+#define TEMP_RST     0x06
 
 // Custom Driver Addresses
 #define TMP117_RESOLUTION 78125
 #define TMP117_ADDR 	0x48
+#define I2C_BROADCAST   0x00
 #define TEMP_RSLT 	0x00
 #define TEMP_CFG  	0x01
 #define TEMP_THighLimit 0x02
@@ -135,10 +137,6 @@ void main(void)
 //-- I2C Device
 	i2c = device_get_binding(I2C_DEV);
 
-	// Read TMP117 DEVID 
-        code = i2c_burst_read(i2c, TMP117_ADDR, TEMP_DEVID, &serial_num, 2);
-        __ASSERT(code == 0, "ERROR: i2c_read, exit with code %u\n", code);
-	
 	/* === Setup TMP117 === */
 	config = sys_cpu_to_be16(TEMP_CFG_VAL);
 	code = i2c_burst_write(i2c, TMP117_ADDR, TEMP_CFG, &config, 2);
@@ -149,6 +147,8 @@ void main(void)
 	config = sys_be16_to_cpu(config);
 	printk("NEW CONFIG: %d\r\n", config);
 
+
+	/* === Counter for Heater === */
 	counter = 0;
 	while (1) {
 		if(counter == 1){
@@ -165,7 +165,17 @@ void main(void)
 			counter = 0;
 		}
 		counter++;
+
+		/* === Start Temperature Extraction === */
 		prev_time = k_uptime_get_32();
+
+		/* Reset TMP117 */
+		config = sys_cpu_to_be16(TEMP_RST);
+		code = i2c_burst_write(i2c, I2C_BROADCAST, TEMP_CFG, &config, 2);
+
+		/* Setup TMP117 */
+		config = sys_cpu_to_be16(TEMP_CFG_VAL);
+		code = i2c_burst_write(i2c, TMP117_ADDR, TEMP_CFG, &config, 2);
 
 		/* Check for Data Ready */
 		while((data_rdy & 0x2000) == 0){
@@ -175,6 +185,7 @@ void main(void)
 		}
 		data_rdy = 0;
 
+		/* Record Data */
         	code = i2c_burst_read(i2c, TMP117_ADDR, TEMP_RSLT, &temp, 2);
         	__ASSERT(code == 0, "ERROR: i2c_read, exit with code %u\n", code);
 		temp = sys_be16_to_cpu(temp);

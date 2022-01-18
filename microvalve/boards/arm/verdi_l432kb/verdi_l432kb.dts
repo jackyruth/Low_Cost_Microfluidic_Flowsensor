@@ -58,8 +58,8 @@
 };
 
 &pll {
-	div-m = <4>;  /* PLLM */
-	mul-n = <8>; /* PLLN */
+	div-m = <2>;  /* PLLM */
+	mul-n = <64>; /* PLLN */
 	div-p = <7>; /* Irrelevant (SAI) */
 	div-q = <2>; /* Irrelenvat (4M1) */
 	div-r = <2>; /* PLLClock */
@@ -69,7 +69,7 @@
 
 &rcc {
 	clocks = <&pll>;
-	clock-frequency = <DT_FREQ_M(4)>;
+	clock-frequency = <DT_FREQ_M(64)>;
 	ahb-prescaler = <1>;
 	apb1-prescaler = <1>;
 	apb2-prescaler = <1>;
