@@ -1,3 +1,5 @@
+timedelta: 17
+segment_length: 10000
 data_path: data/
 data_files:
         # - 10.txt
@@ -22,7 +24,7 @@ data_files:
         - 30_arduino_5mm.txt
         - 35_arduino_5mm.txt
         - 40_arduino_5mm.txt
-          # - 50_arduino_5mm.txt
-          #- 60_arduino_5mm.txt
-          #- 70_arduino_5mm.txt
-          #- 80_arduino_5mm.txt
+        - 50_arduino_5mm.txt
+        - 60_arduino_5mm.txt
+        - 70_arduino_5mm.txt
+        - 80_arduino_5mm.txt

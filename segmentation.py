@@ -1,17 +1,21 @@
+import yaml
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import numpy as np
 import model as md
 
-segment_length = 10000 # milliseconds
-delta_t = 17 # milliseconds
-max_delta_t = 18 # milliseconds
-# flowrate_data = ["10","20","40","60","80"]
-flowrate_data = ["20","40","60","80"]
-for flowrate in flowrate_data:
-    with open("data/"+flowrate+"_arduino_5mm.txt","r") as fp:
-        datalist = fp.read().strip().split("\n")
+with open("data_to_analyze.yml", 'r') as fp:
+    data_loaded = yaml.safe_load(fp)
+path = data_loaded["data_path"]
+filenames = data_loaded["data_files"]
+delta_t = data_loaded["timedelta"]
+segment_length = data_loaded["segment_length"]
 
+max_delta_t = 18 # milliseconds
+
+for filename in filenames:
+    with open(path+filename,"r") as fp:
+        datalist = fp.read().strip().split("\n")
     sync = False
     segment_list = []
     
@@ -82,6 +86,6 @@ for flowrate in flowrate_data:
     plt.legend(loc="upper right")
     plt.xlabel("Time (ms)")
     plt.ylabel("Temperature Delta (Celsius)")
-    plt.title(flowrate+" uL/min")
-    plt.ylim(0,max_temp)
+    plt.title(filename+" uL/min")
+    plt.ylim(0,0.3)
     plt.show()
