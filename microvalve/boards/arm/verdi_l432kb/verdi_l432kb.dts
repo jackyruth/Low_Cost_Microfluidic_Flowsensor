@@ -106,7 +106,7 @@
 //I2C
 &i2c1 {
 	pinctrl-0 = <&i2c1_sda_pa10 &i2c1_scl_pa9>;
-	clock-frequency = <I2C_BITRATE_STANDARD>;
+	clock-frequency = <I2C_BITRATE_FAST>;
 	status = "okay";
 };
 
