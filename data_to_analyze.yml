@@ -1,4 +1,4 @@
-timedelta: 17
+timedelta: 20 # 20 for cubeide, 17 for others
 segment_length: 10000
 data_path: data/
 data_files:
@@ -13,31 +13,31 @@ data_files:
         # - 60_farsensor.txt
         # - 70_farsensor.txt
         # - 80_farsensor.txt
-        #- 5_arduino_5mm.txt
-          # - 7_arduino_5mm.txt
-          #- 10_arduino_5mm.txt
-          # - 10_2_arduino_5mm.txt
-          #- 15_arduino_5mm.txt
-          #- 17_arduino_5mm.txt
-          #- 20_arduino_5mm.txt
-          #- 25_arduino_5mm.txt
-          #- 30_arduino_5mm.txt
-          #- 35_arduino_5mm.txt
-          #- 40_arduino_5mm.txt
+        - 5_arduino_5mm.txt
+        # - 7_arduino_5mm.txt
+        - 10_arduino_5mm.txt
+        # - 10_2_arduino_5mm.txt
+        - 15_arduino_5mm.txt
+        # - 17_arduino_5mm.txt
+        - 20_arduino_5mm.txt
+        - 25_arduino_5mm.txt
+        - 30_arduino_5mm.txt
+        - 35_arduino_5mm.txt
+        #- 40_arduino_5mm.txt
           #- 50_arduino_5mm.txt
           #- 60_arduino_5mm.txt
           #- 70_arduino_5mm.txt
           #- 80_arduino_5mm.txt
-          #- 2-5_cubeide_2mm.txt
-       - 5_cubeide_2mm.txt
-       - 10_cubeide_2mm.txt
-       - 15_cubeide_2mm.txt
-       - 20_cubeide_2mm.txt
-       - 25_cubeide_2mm.txt
-       - 30_cubeide_2mm.txt
-       - 35_cubeide_2mm.txt
-       - 40_cubeide_2mm.txt
-         #- 50_cubeide_2mm.txt
-         #- 60_cubeide_2mm.txt
-         #- 70_cubeide_2mm.txt
-         #- 80_cubeide_2mm.txt
+        #- 2-5_cubeide_2mm.txt
+        - 5_cubeide_2mm.txt
+        - 10_cubeide_2mm.txt
+        - 15_cubeide_2mm.txt
+        - 20_cubeide_2mm.txt
+        - 25_cubeide_2mm.txt
+        - 30_cubeide_2mm.txt
+        - 35_cubeide_2mm.txt
+          #- 40_cubeide_2mm.txt
+        #- 50_cubeide_2mm.txt
+        # - 60_cubeide_2mm.txt
+        #- 70_cubeide_2mm.txt
+        # - 80_cubeide_2mm.txt

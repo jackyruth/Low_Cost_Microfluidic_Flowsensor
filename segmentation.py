@@ -11,7 +11,7 @@ filenames = data_loaded["data_files"]
 delta_t = data_loaded["timedelta"]
 segment_length = data_loaded["segment_length"]
 
-max_delta_t = 18 # milliseconds
+max_delta_t = 22 # milliseconds
 
 for filename in filenames:
     with open(path+filename,"r") as fp:
@@ -43,11 +43,11 @@ for filename in filenames:
     segment_list = segment_list [:-1] # remove last segment as it may be incomplete
     segments= [] 
     for seg in segment_list:
-        if(max(np.diff(seg["time"]))<max_delta_t):
-            time_len = len(seg["time"])
-            if(len(seg["temp"]) == time_len):
-                if(len(seg["heat"]) == time_len):
-                    segments.append(seg)
+        # if(max(np.diff(seg["time"]))<max_delta_t):
+        time_len = len(seg["time"])
+        if(len(seg["temp"]) == time_len):
+            if(len(seg["heat"]) == time_len):
+                segments.append(seg)
     
     # Info Printouts
     print("Number of segments: " + str(len(segments)))
@@ -87,5 +87,5 @@ for filename in filenames:
     plt.xlabel("Time (ms)")
     plt.ylabel("Temperature Delta (Celsius)")
     plt.title(filename+" uL/min")
-    plt.ylim(0,0.3)
+    plt.ylim(0,2)
     plt.show()

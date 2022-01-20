@@ -280,9 +280,9 @@ F 3 "" H 2900 3450 50  0001 C CNN
 	1    2900 3450
 	0    -1   -1   0   
 $EndComp
-Text Label 2900 4250 0    50   ~ 0
+Text Label 2150 6450 2    50   ~ 0
 SDA
-Text Label 2900 5050 0    50   ~ 0
+Text Label 2150 6850 2    50   ~ 0
 SCL
 Text Notes 900  2350 0    50   ~ 0
 TMP117: 3.22CAD/unit @ 500 units\n\nPullups can be a heat source, so maintain some distance.\nDo not solder thermal pad as it may introduce measurement error.\nRefer to Application Report SNOA986A to optimize surface measurement\n\nADD0 --- Address\nGND --- 0x48\nVDD --- 0x49\nSDA --- 0x4A\nSCL --- 0x4B
@@ -978,13 +978,7 @@ F 3 "" H 3300 5250 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Notes Line
-	800  5550 3900 5550
-Wire Notes Line
-	3900 5550 3900 1350
-Wire Notes Line
 	3900 1350 800  1350
-Wire Notes Line
-	800  1350 800  5550
 Text Notes 4800 1650 0    50   ~ 0
 STM32L432KB MCU
 Wire Notes Line
@@ -1113,4 +1107,148 @@ NoConn ~ 6900 3450
 NoConn ~ 6900 3350
 NoConn ~ 9450 4450
 NoConn ~ 9450 4350
+$Comp
+L flowsensor:tmp117 U7
+U 1 1 61EAF2D8
+P 2250 6050
+F 0 "U7" H 2525 6715 50  0000 C CNN
+F 1 "tmp117" H 2525 6624 50  0000 C CNN
+F 2 "Package_SON:WSON-6-1EP_2x2mm_P0.65mm_EP1x1.6mm" H 2150 6250 50  0001 C CNN
+F 3 "" H 2150 6250 50  0001 C CNN
+	1    2250 6050
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R8
+U 1 1 61EAF2DE
+P 2000 5850
+F 0 "R8" H 2150 5800 50  0000 C CNN
+F 1 "10k" H 2150 5900 50  0000 C CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric" V 1930 5850 50  0001 C CNN
+F 3 "~" H 2000 5850 50  0001 C CNN
+	1    2000 5850
+	0    1    1    0   
+$EndComp
+$Comp
+L power:VDD #PWR0103
+U 1 1 61EAF2E4
+P 1850 5850
+F 0 "#PWR0103" H 1850 5700 50  0001 C CNN
+F 1 "VDD" V 1868 5977 50  0000 L CNN
+F 2 "" H 1850 5850 50  0001 C CNN
+F 3 "" H 1850 5850 50  0001 C CNN
+	1    1850 5850
+	0    -1   -1   0   
+$EndComp
+Text Label 2150 5650 2    50   ~ 0
+SCL
+$Comp
+L power:GND #PWR0104
+U 1 1 61EAF2EB
+P 2150 5750
+F 0 "#PWR0104" H 2150 5500 50  0001 C CNN
+F 1 "GND" V 2155 5622 50  0000 R CNN
+F 2 "" H 2150 5750 50  0001 C CNN
+F 3 "" H 2150 5750 50  0001 C CNN
+	1    2150 5750
+	0    1    1    0   
+$EndComp
+Text Label 2900 5650 0    50   ~ 0
+SDA
+$Comp
+L power:VDD #PWR0108
+U 1 1 61EAF2F3
+P 3300 5750
+F 0 "#PWR0108" H 3300 5600 50  0001 C CNN
+F 1 "VDD" H 3317 5923 50  0000 C CNN
+F 2 "" H 3300 5750 50  0001 C CNN
+F 3 "" H 3300 5750 50  0001 C CNN
+	1    3300 5750
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C15
+U 1 1 61EAF2F9
+P 3300 5900
+F 0 "C15" H 3185 5854 50  0000 R CNN
+F 1 "100nF" H 3185 5945 50  0000 R CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric" H 3338 5750 50  0001 C CNN
+F 3 "~" H 3300 5900 50  0001 C CNN
+	1    3300 5900
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	3300 5750 2900 5750
+Connection ~ 3300 5750
+$Comp
+L power:GND #PWR0109
+U 1 1 61EAF301
+P 3300 6050
+F 0 "#PWR0109" H 3300 5800 50  0001 C CNN
+F 1 "GND" H 3305 5877 50  0000 C CNN
+F 2 "" H 3300 6050 50  0001 C CNN
+F 3 "" H 3300 6050 50  0001 C CNN
+	1    3300 6050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 2900 5950
+Text Label 2900 4250 0    50   ~ 0
+ADD1
+Text Label 2900 5050 0    50   ~ 0
+ADD2
+Text Label 2900 5850 0    50   ~ 0
+ADD3
+Text Label 2300 6650 0    50   ~ 0
+ADD1
+Text Label 2750 6650 0    50   ~ 0
+ADD2
+Text Label 3200 6650 0    50   ~ 0
+ADD3
+$Comp
+L Jumper:SolderJumper_3_Open JP1
+U 1 1 61F8FAC1
+P 2150 6650
+F 0 "JP1" V 1900 6850 50  0000 C CNN
+F 1 "SolderJumper_3_Open" V 1800 6500 50  0000 C CNN
+F 2 "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm_NumberLabels" H 2150 6650 50  0001 C CNN
+F 3 "~" H 2150 6650 50  0001 C CNN
+	1    2150 6650
+	0    -1   -1   0   
+$EndComp
+Text Label 2600 6450 2    50   ~ 0
+SDA
+Text Label 2600 6850 2    50   ~ 0
+SCL
+$Comp
+L Jumper:SolderJumper_3_Open JP2
+U 1 1 61F987D5
+P 2600 6650
+F 0 "JP2" V 3050 7000 50  0000 C CNN
+F 1 "SolderJumper_3_Open" V 2950 6650 50  0000 C CNN
+F 2 "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm_NumberLabels" H 2600 6650 50  0001 C CNN
+F 3 "~" H 2600 6650 50  0001 C CNN
+	1    2600 6650
+	0    -1   -1   0   
+$EndComp
+Text Label 3050 6450 2    50   ~ 0
+SDA
+Text Label 3050 6850 2    50   ~ 0
+SCL
+$Comp
+L Jumper:SolderJumper_3_Open JP3
+U 1 1 61F9B9B4
+P 3050 6650
+F 0 "JP3" V 2800 6850 50  0000 C CNN
+F 1 "SolderJumper_3_Open" V 2700 6500 50  0000 C CNN
+F 2 "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm_NumberLabels" H 3050 6650 50  0001 C CNN
+F 3 "~" H 3050 6650 50  0001 C CNN
+	1    3050 6650
+	0    -1   -1   0   
+$EndComp
+Wire Notes Line
+	3900 7150 800  7150
+Wire Notes Line
+	3900 1350 3900 7150
+Wire Notes Line
+	800  1350 800  7150
 $EndSCHEMATC

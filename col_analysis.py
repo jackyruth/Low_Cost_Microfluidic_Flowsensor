@@ -2,7 +2,7 @@ import yaml
 import numpy as np
 import matplotlib.pyplot as plt
 
-normalize = False
+normalize = True
 
 with open("data_to_analyze.yml", 'r') as fp:
     data_loaded = yaml.safe_load(fp)
