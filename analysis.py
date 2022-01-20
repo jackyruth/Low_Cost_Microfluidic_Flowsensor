@@ -8,12 +8,14 @@ temp   = []
 heater = []
 
 first_heater = False
+old_time = 0
 for line in sys.stdin:
     data = line.strip().split(' ')
-    if(len(data) == 3):
+    if((len(data) == 3)and(int(data[0])>old_time)):
         if(int(data[2])== 100):
             first_heater = True
         if(first_heater):
+            old_time =int(data[0])
             x_time.append(int(data[0]))
             temp.append(float(data[1]))
             heater.append(int(data[2]))

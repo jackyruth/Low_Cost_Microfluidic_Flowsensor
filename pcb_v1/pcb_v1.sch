@@ -727,30 +727,10 @@ F 3 "" H 8750 3950 50  0001 C CNN
 	1    8750 3950
 	0    -1   -1   0   
 $EndComp
-Text Label 6900 3350 0    50   ~ 0
-PA4
-Text Label 6900 3450 0    50   ~ 0
-PA5
-Text Label 6900 3550 0    50   ~ 0
-PA6
-Text Label 6900 3650 0    50   ~ 0
-PA7
-Text Label 8750 4550 2    50   ~ 0
-PA4
-Text Label 8750 4450 2    50   ~ 0
-PA5
-Text Label 8750 4250 2    50   ~ 0
-PA6
-Text Label 8750 4150 2    50   ~ 0
-PA7
 Text Label 9450 4050 0    50   ~ 0
 OUT4
 Text Label 9450 4150 0    50   ~ 0
 OUT3
-Text Label 9450 4450 0    50   ~ 0
-OUT2
-Text Label 9450 4350 0    50   ~ 0
-OUT1
 $Comp
 L power:GND #PWR020
 U 1 1 61F544AE
@@ -1108,4 +1088,29 @@ Wire Notes Line
 	10750 3600 8450 3600
 Text Notes 8500 3700 0    50   ~ 0
 Heater
+NoConn ~ 6900 2950
+NoConn ~ 6900 3050
+NoConn ~ 6900 3750
+NoConn ~ 6900 4050
+NoConn ~ 6900 4150
+NoConn ~ 6900 4450
+NoConn ~ 5900 4250
+NoConn ~ 5900 4150
+NoConn ~ 5900 4050
+NoConn ~ 5900 3950
+NoConn ~ 5900 3850
+Text Label 8750 4250 2    50   ~ 0
+PA6
+Text Label 8750 4150 2    50   ~ 0
+PA7
+Text Label 6900 3650 0    50   ~ 0
+PA7
+Text Label 6900 3550 0    50   ~ 0
+PA6
+NoConn ~ 8750 4550
+NoConn ~ 8750 4450
+NoConn ~ 6900 3450
+NoConn ~ 6900 3350
+NoConn ~ 9450 4450
+NoConn ~ 9450 4350
 $EndSCHEMATC
