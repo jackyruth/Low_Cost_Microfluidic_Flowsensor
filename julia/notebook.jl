@@ -22,6 +22,18 @@ begin
 	using WebIO,PlutoUI
 end
 
+# ╔═╡ 24692cb4-41da-400b-988c-b7596eb19024
+md"""
+# Import Temperature Curve Data
+TODO: Automate data segmentation
+"""
+
+# ╔═╡ ee973c19-b066-45ff-948f-f7e48a5bcbe9
+@bind sample_rate Slider(1:1:50,show_value=true) # Control sample rate
+
+# ╔═╡ 8f90774c-f8ae-4413-8541-f2964f61b503
+@bind curtail Slider(50:20:400,show_value=true)  # Control processing time
+
 # ╔═╡ afbb6c88-6ce3-42f3-a9f3-24dc293d2a10
 begin
 	df = CSV.read("20_single.txt", header=["time","temp"], DataFrame)
@@ -30,43 +42,66 @@ begin
 		end
 	dfg[:, "time"] .-= dfg[1, "time"]         # Normalize time
 	dfg[:, "temp"] .-= minimum(dfg[:,"temp"]) # Normalize temperature
-	sample_rate = 1                           # Control sample rate
-	stop_recording = length(dfg[:,"time"])-50    # Control ending rate
+	stop_recording = length(dfg[:,"time"])-curtail # Control ending rate
 	dfg=dfg[1:sample_rate:stop_recording,:]                     
 	describe(dfg)
+end
+
+# ╔═╡ 2b03ffc1-aafc-4d4b-8d5d-4df444f51835
+md"""
+# Model Parameter Manual Estimation
+"""
+
+# ╔═╡ 62e9ccf1-de1f-49b3-9962-25eb3bf03345
+md"""
+The model is the following equation
+```math
+f(t)=\frac{q}{4\pi kt} e^{-\frac{(x-vt)^2}{4at}}
+``` \
+$q$ is the pulse signal input strength \
+$x$ is the distance between the heater and the sensor in mm)\
+$k$ is the thermal conductivity in w/(mm*K)\
+$a$ is the thermal diffusivity in mm^2/ms\
+$v$ is the average flow velocity in mm/ms \
+$t$ is time (ms) \
+We also introduce a delay factor $d$ to control when $t = 0$
+"""
+
+# ╔═╡ 87329476-6906-4d2d-8894-b1417e7ed394
+begin
+	k=0.598/1000 # watt per millimeter kelvin
+	a=0.143/1000 # millimeter^2 per millisecond
+	md"""
+	Use the thermal conductivity and diffusivity of water as initial guesses. Use Watt, Kelvin, Millimeters and Milliseconds as units.
+	"""
 end
 
 # ╔═╡ b5d25ce6-55e1-4606-a0d5-b3d6194753b6
 @bind q Slider(0:1:100,show_value=true)
 
-# ╔═╡ 86bc3139-968e-420e-8f62-5b645adff533
-@bind d Slider(0:20:2500,show_value=true)
-
 # ╔═╡ d9139475-0cdb-4562-a633-0ef5fe54153d
 @bind x Slider(1.0:0.1:5,show_value=true)
 
+# ╔═╡ 86bc3139-968e-420e-8f62-5b645adff533
+@bind d Slider(0:20:2500,show_value=true)
+
 # ╔═╡ 718d72de-81b4-4db1-b754-3ff153dc0f21
-begin
-	md"""
-	Flow velocity
-	"""
-	@bind s Slider(1E-5:1E-5:1E-3,show_value=true)
-end
+@bind v Slider(1E-5:1E-5:1E-3,show_value=true)
 
 # ╔═╡ 84d13308-81f2-4e0c-b915-df6ce710fca1
 begin
 	tdata = dfg[!,"time"]
 	ydata = dfg[!,"temp"]
-	k=0.598/1000
-	a=0.143/1000
 	## The following makes a fit
 	# q = 44
 	# d = 1000
 	# x = 3
 	# s = 0.00048
-	f(t) = @. q/(4*π*k*(t+d))*ℯ^(-(x-s*(t+d))^2/(4*a*(t+d)))
-	scatter(tdata,ydata,markersize = 1)
+	old_τ = (-2*a+sqrt(4*a^2+v^2*x^2))/v^2 - d
+	f(t) = @. q/(4*π*k*(t+d))*ℯ^(-(x-v*(t+d))^2/(4*a*(t+d)))
+	scatter(tdata,ydata,markersize = 5)
 	plot!(f,w=3)
+	vline!([old_τ])
 end
 
 # ╔═╡ 3f778a7e-9902-46f9-beee-b58f2d268738
@@ -76,21 +111,67 @@ md"""
 
 # ╔═╡ 97b156fb-f4ca-41a2-a4b6-0fab42471917
 begin
-	m(t, p) = @. p[1]/(4*p[2]*π*(t+p[5]))*ℯ^(-(2-p[3]*(t+p[5]))^2/(4*p[4]*(t+p[5])))
-	p0 = [q,k,s,a,d]
+	# four_param = true
+	# if(four_param)
+	# 	m(t, p) = @. p[1]/(4*k*π*(t+p[3]))*ℯ^(-(p[4]-p[2]*(t+p[3]))^2/(4*a*(t+p[3])))
+	# 	p0 = [q,v,d,x]
+	# else
+	m(t, p) = @. p[1]/(4*p[5]*π*(t+p[3]))*ℯ^(-(p[4]-p[2]*(t+p[3]))^2/(4*p[6]*(t+p[3])))
+	p0 = [q,v,d,x,k,a]
+	# end
 	fit = curve_fit(m, tdata, ydata, p0)
 	cov = estimate_covar(fit)
 end
 
 # ╔═╡ 35aa9d12-6597-4f09-906d-e41830bceedb
-fit.param
+begin
+	q1 = fit.param[1]
+	v1 = fit.param[2]
+	d1 = fit.param[3]
+	x1 = fit.param[4]
+	k1 = fit.param[5]
+	a1 = fit.param[6]
+
+	md"""
+	(old q, new q): (\$$q, \$$q1) \
+	(old v, new v): (\$$v, \$$v1) \
+	(old d, new d): (\$$d, \$$d1) \
+	(old x, new x): (\$$x, \$$x1) \
+	(old k, new k): (\$$k, \$$k1) \
+	(old a, new a): (\$$a, \$$a1)
+	"""
+end
+
+# ╔═╡ 946ba534-4139-4e2c-9a05-e6de825c6321
+begin
+	τ = (-2*a1+sqrt(4*a1^2+v1^2*x1^2))/v1^2 - d1
+	v2 = x1/τ
+	r = 0.127 # mm
+	A = π*r^2 # mm^2
+	flowrate = A*v2*1000*60
+	cap_flowrate = 80/(A*60)
+	md"""
+	timedelta τ is \$$τ ms \
+	$d_{hs}$/τ = \$$v2 \
+	cross-sectional area of the tube A is $A mm^2 \
+	flowrate is $flowrate uL/min. \
+	Expected flowrates range from 0 to \$$cap_flowrate mm/s
+	"""
+end
 
 # ╔═╡ ab705671-fdde-4a93-861d-59f3b36a5c15
 begin
-	t = range(0, 10000, length = 5000)
-	show(fit.param)
-	scatter(tdata,ydata,markersize = 1)
-	plot!(t,m(t,fit.param),w=3)
+	t = range(0, 12000, length = 6000)
+	scatter(tdata,ydata,markersize = 5)
+	plot!(t,m(t,fit.param),w=5)
+	vline!([τ])
+end
+
+# ╔═╡ a2365c10-eba5-4638-8c2c-36001882cc07
+begin
+	md"""
+	Important variables to save (v1,x1,τ) = (\$$v1,\$$x1,\$$τ)
+	"""
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1405,15 +1486,23 @@ version = "0.9.1+5"
 
 # ╔═╡ Cell order:
 # ╠═e858dffe-7c1b-11ec-191f-51f24d41113b
-# ╠═afbb6c88-6ce3-42f3-a9f3-24dc293d2a10
+# ╟─24692cb4-41da-400b-988c-b7596eb19024
+# ╠═ee973c19-b066-45ff-948f-f7e48a5bcbe9
+# ╠═8f90774c-f8ae-4413-8541-f2964f61b503
+# ╟─afbb6c88-6ce3-42f3-a9f3-24dc293d2a10
+# ╟─2b03ffc1-aafc-4d4b-8d5d-4df444f51835
+# ╟─62e9ccf1-de1f-49b3-9962-25eb3bf03345
+# ╟─87329476-6906-4d2d-8894-b1417e7ed394
 # ╠═b5d25ce6-55e1-4606-a0d5-b3d6194753b6
-# ╠═86bc3139-968e-420e-8f62-5b645adff533
 # ╠═d9139475-0cdb-4562-a633-0ef5fe54153d
+# ╠═86bc3139-968e-420e-8f62-5b645adff533
 # ╠═718d72de-81b4-4db1-b754-3ff153dc0f21
-# ╠═84d13308-81f2-4e0c-b915-df6ce710fca1
-# ╠═3f778a7e-9902-46f9-beee-b58f2d268738
-# ╠═97b156fb-f4ca-41a2-a4b6-0fab42471917
-# ╠═35aa9d12-6597-4f09-906d-e41830bceedb
-# ╠═ab705671-fdde-4a93-861d-59f3b36a5c15
+# ╟─84d13308-81f2-4e0c-b915-df6ce710fca1
+# ╟─3f778a7e-9902-46f9-beee-b58f2d268738
+# ╟─97b156fb-f4ca-41a2-a4b6-0fab42471917
+# ╟─35aa9d12-6597-4f09-906d-e41830bceedb
+# ╟─946ba534-4139-4e2c-9a05-e6de825c6321
+# ╟─ab705671-fdde-4a93-861d-59f3b36a5c15
+# ╟─a2365c10-eba5-4638-8c2c-36001882cc07
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
