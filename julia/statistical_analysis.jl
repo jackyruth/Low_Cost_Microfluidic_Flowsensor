@@ -4,125 +4,78 @@
 using Markdown
 using InteractiveUtils
 
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    quote
-        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
-        el
-    end
-end
-
 # ╔═╡ e858dffe-7c1b-11ec-191f-51f24d41113b
 begin
 	using StatsPlots,CSV, DelimitedFiles
 	using DataFrames,Chain, DataFramesMeta
 	using LsqFit
 	using WebIO,PlutoUI
+	using Statistics
 end
 
-# ╔═╡ afbb6c88-6ce3-42f3-a9f3-24dc293d2a10
+# ╔═╡ 6534f1c8-3e19-4dea-8b5a-087ff696f819
 begin
-	df = CSV.read("20_cubeide_2mm.txt", header=["time","temp","heat"], DataFrame)
-	dfa = @chain df begin
-		@subset((!isnan).(:temp))
-		@subset((!isnan).(:heat))
+	flowrate_list = [5 10 15 20 25 30 35 40 50 60 70 80]
+	gdfg= DataFrame(time=Int[],temp=Float32[],heat=Int[],segm=Int[],flow=Int[])
+	for flow in flowrate_list
+		filename = "../data/"*"$flow"*"_cubeide_2mm.txt"#"_arduino_5mm.txt"
+		df = CSV.read(filename, header=["time","temp","heat"], DataFrame)
+		dfa = @chain df begin
+			@subset((!isnan).(:temp))
+			@subset((!isnan).(:heat))
 		end
-	num_rows = nrow(dfa)
-	sync=0
-	gdfg= DataFrame(A=Int[], B=Float32[], C=Int[], D=Int[])
-	rename!(gdfg,:A => :time);rename!(gdfg,:B => :temp)
-	rename!(gdfg,:C => :heat);rename!(gdfg,:D => :segm)
-	idx = 1
-	start_idx = 1
-	start_time = 0
-	for j in 1:num_rows
-		if(dfa[j,"time"]>start_time)
-			if((dfa[j,"heat"] == 100) && sync==0)
-				global sync = 1
+		num_rows = nrow(dfa)
+		sync=0
+		seg = 1
+		start_time = 0
+		for j in 1:num_rows
+			if(dfa[j,"time"]>start_time)
+				if((dfa[j,"heat"] == 100) && sync==0)
+					sync = 1
+				end
+				if((dfa[j,"heat"] == 0) && sync==1)
+					sync = 2
+				end
+				if(sync == 2)
+					push!(gdfg,(dfa[j,"time"],dfa[j,"temp"],dfa[j,"heat"],seg,flow))
+				end
+				if((dfa[j,"heat"] == 100) && sync==2)
+						sync = 0
+						seg += 1
+				end
+				start_time = dfa[j,"time"]
 			end
-			if((dfa[j,"heat"] == 0) && sync==1)
-				global sync = 2
-			end
-			if(sync == 2)
-				push!(gdfg,(dfa[j,"time"],dfa[j,"temp"],dfa[j,"heat"],idx))
-			end
-			if((dfa[j,"heat"] == 100) && sync==2)
-					global sync = 0
-					global idx += 1
-					global start_idx = nrow(gdfg)
-			end
-			global start_time = dfa[j,"time"]
 		end
 	end
-	gd = groupby(gdfg, :segm, skipmissing=true)[1:end-1]
+	gd = groupby(gdfg, :flow, skipmissing=true)
 	md"""
-	# Import Temperature Data
+	# Data Characteristics
 	"""
 end
 
-# ╔═╡ b685b665-c962-4d83-b0d0-110d174f17f2
-md"""
-**Sample rate slider**
-"""
-
-# ╔═╡ ee973c19-b066-45ff-948f-f7e48a5bcbe9
-@bind sample_rate Slider(1:1:50,show_value=true) # Control sample rate
-
-# ╔═╡ 4e220425-8ea1-4baf-b784-0719bbb491eb
-md"""
-**Sample Duration Slider**
-"""
-
-# ╔═╡ 8f90774c-f8ae-4413-8541-f2964f61b503
-@bind curtail Slider(50:20:400,show_value=true)  # Control processing time
-
-# ╔═╡ d80c89f7-c31b-4ffb-8254-1839fb1f7fd8
-md"""
-**Pulse slider**
-"""
-
-# ╔═╡ a5369ca7-c249-4739-beb0-0cfcbd812329
-@bind sample Slider(1:1:size(gd)[1],show_value=true)  # Control processing timesize
-
 # ╔═╡ 674412de-8bcd-4e77-8ed3-87bc42c1823e
 begin
-	dfg = get(gd, (sample,), nothing)
-	describe(dfg)
-	dfg[:, "time"] .-= dfg[1, "time"]         # Normalize time
-	dfg[:, "temp"] .-= minimum(dfg[:,"temp"]) # Normalize temperature
-	stop_recording = length(dfg[:,"time"])-curtail # Control ending rate
-	dfg=dfg[1:sample_rate:stop_recording,:]
+	sample_rate = 1 # 20
+	curtail = 50     # 100
 	md"""
-	Normalize dataframe of chosen pulse and change sampling rate and duration
+	Set sample rate ($sample_rate) and sample duration (\$$curtail)
 	"""
 end
 
 # ╔═╡ 3874130f-f78f-4a74-b4f0-f8e14c4d6a11
 begin
 	r = 0.127 # mm
-	A = π*r^2 # mm^2
+	x = 3
 	md"""
 	# Sensor Geometry Parameters
 	inner radius is \$$r mm \
-	so the area is \$$A mm^2
-	## distance between the heater and sensor
-	Let $x$ be the distance between the heater and sensor. It can be set as a parameter to fit. However, previous explorations showed that this was not a good idea.
-	Therefore we fix this value.
+	distance between heater and sensor is \$$x mm
 	"""
 end
 
-# ╔═╡ d9139475-0cdb-4562-a633-0ef5fe54153d
-@bind x Slider(1.0:0.1:5,show_value=true)
-
-# ╔═╡ 2b03ffc1-aafc-4d4b-8d5d-4df444f51835
-md"""
-# Model Parameter Manual Estimation
-"""
-
 # ╔═╡ 62e9ccf1-de1f-49b3-9962-25eb3bf03345
 md"""
+# Analytical Model
 The model is the following equation
 ```math
 f(t)=\frac{q}{4\pi kt} e^{-\frac{(x-vt)^2}{4at}}
@@ -136,131 +89,110 @@ $t$ is time (ms) \
 We also introduce a delay factor $d$ to control when $t = 0$
 """
 
-# ╔═╡ 87329476-6906-4d2d-8894-b1417e7ed394
+# ╔═╡ 84d13308-81f2-4e0c-b915-df6ce710fca1
 begin
+	## The following makes a fit
 	k=0.598/1000 # watt per millimeter kelvin
 	a=0.143/1000 # millimeter^2 per millisecond
+	q = 40
+	d = 1000
+	v = 0.0005
 	md"""
 	Use the thermal conductivity and diffusivity of water as initial guesses. Use Watt, Kelvin, Millimeters and Milliseconds as units.
 	"""
 end
 
-# ╔═╡ b5d25ce6-55e1-4606-a0d5-b3d6194753b6
-@bind q Slider(0:1:100,show_value=true)
-
-# ╔═╡ 86bc3139-968e-420e-8f62-5b645adff533
-@bind d Slider(0:20:2500,show_value=true)
-
-# ╔═╡ 718d72de-81b4-4db1-b754-3ff153dc0f21
-@bind v Slider(1E-5:1E-5:1E-3,show_value=true)
-
-# ╔═╡ 84d13308-81f2-4e0c-b915-df6ce710fca1
-begin
-	tdata = dfg[!,"time"]
-	ydata = dfg[!,"temp"]
-	## The following makes a fit
-	# q = 44
-	# d = 1000
-	# x = 3
-	# s = 0.00048
-	old_τ = (-2*a+sqrt(4*a^2+v^2*x^2))/v^2 - d
-	f(t) = @. q/(4*π*k*(t+d))*ℯ^(-(x-v*(t+d))^2/(4*a*(t+d)))
-	scatter(tdata,ydata,markersize = 5)
-	plot!(f,w=3)
-	vline!([old_τ])
-end
-
-# ╔═╡ 3f778a7e-9902-46f9-beee-b58f2d268738
-md"""
-# Non-Linear Least Squares
-"""
-
-# ╔═╡ 97b156fb-f4ca-41a2-a4b6-0fab42471917
-begin
-	m(t, p) = @. p[1]/(4*p[4]*π*(t+p[3]))*ℯ^(-(x-p[2]*(t+p[3]))^2/(4*p[5]*(t+p[3])))
-	p0 = [q,v,d,k,a]
-	fit = curve_fit(m, tdata, ydata, p0)
-	cov = estimate_covar(fit)
-end
-
-# ╔═╡ 35aa9d12-6597-4f09-906d-e41830bceedb
-begin
-	q1 = fit.param[1]
-	v1 = fit.param[2]
-	d1 = fit.param[3]
-	x1 = fit.param[4]
-	k1 = fit.param[4]
-	a1 = fit.param[5]
-
-	md"""
-	(old q, new q): (\$$q, \$$q1) \
-	(old v, new v): (\$$v, \$$v1) \
-	(old d, new d): (\$$d, \$$d1) \
-	Fixed x at \$$x \
-	(old k, new k): (\$$k, \$$k1) \
-	(old a, new a): (\$$a, \$$a1)
-	"""
-end
-
-# ╔═╡ 946ba534-4139-4e2c-9a05-e6de825c6321
-begin
-	τ = (-2*a1+sqrt(4*a1^2+v1^2*x^2))/v1^2 - d1
-	md"""
-	timedelta τ is \$$τ ms \
-	"""
-end
-
-# ╔═╡ ab705671-fdde-4a93-861d-59f3b36a5c15
-begin
-	t = range(0, 12000, length = 6000)
-	scatter(tdata,ydata,markersize = 5)
-	plot!(t,m(t,fit.param),w=5)
-	vline!([τ])
-end
-
-# ╔═╡ a2365c10-eba5-4638-8c2c-36001882cc07
-begin
-	md"""
-	Important variables to save (v1,x1,τ) = (\$$v1,\$$x1,\$$τ)
-	"""
-end
-
-# ╔═╡ 12698867-6a6d-4418-b890-2486d42aa8aa
-md"""
-# Repeat for all segments
-Do the above analysis for every segment and save it to a dataframe
-"""
-
 # ╔═╡ ff25f60d-58ea-471c-b4a9-643ec8d18e74
 begin
-	rslts = DataFrame(segm=Int[], q=Float32[], v=Float32[], d=Float32[], x=Float32[], k=Float32[], a=Float32[], τ=Float32[])
-	for dfi in gd
-		tdata1 = dfi[!,"time"]
-		ydata1 = dfi[!,"temp"]
-		p1 = [q,v,d,k,a] # populate initial guesses
-		fit1 = curve_fit(m, tdata1, ydata1, p1) # fit to curve
-		q2 = fit1.param[1]
-		v2 = fit1.param[2]
-		d2 = fit1.param[3]
-		# x parameter is fixed
-		k2 = fit1.param[4]
-		a2 = fit1.param[5]
-		τ2 = (-2*a2+sqrt(4*a2^2+v2^2*x^2))/v2^2 - d2
-		push!(rslts,(dfi[1,"segm"],q2,v2,d2,x,k2,a2,τ2))
+	rslts = DataFrame(flow=Int[], segm=Int[], q=Float32[], v=Float32[], d=Float32[], x=Float32[], k=Float32[], a=Float32[], τ=Float32[])
+	for dfj in gd
+		dfk = groupby(dfj, :segm, skipmissing=true)[1:end-1]
+		for dfi in dfk
+			dfi[:, "time"] .-= dfi[1, "time"]         # Normalize time
+			dfi[:, "temp"] .-= minimum(dfi[:,"temp"]) # Normalize temperature
+			stop_recording = length(dfi[:,"time"])-curtail # Control ending rate
+			dfi=dfi[1:sample_rate:stop_recording,:]
+			tdata1 = dfi[!,"time"]
+			ydata1 = dfi[!,"temp"]
+			m(t, p) = @. p[1]/(4*p[4]*π*(t+p[3]))*ℯ^(-(x-p[2]*(t+p[3]))^2/(4*p[5]*(t+p[3])))
+			p0 = [q,v,d,k,a] # populate initial guesses
+			fit1 = curve_fit(m, tdata1, ydata1, p0) # fit to curve
+			q2 = fit1.param[1]
+			v2 = fit1.param[2]
+			d2 = fit1.param[3]
+			# x parameter is fixed
+			k2 = fit1.param[4]
+			a2 = fit1.param[5]
+			τ2 = (-2*a2+sqrt(4*a2^2+v2^2*x^2))/v2^2 - d2
+			push!(rslts,(dfj[1,"flow"],dfi[1,"segm"],q2,v2,d2,x,k2,a2,τ2))
+		end
 	end
 	md"""
+	# Perform Analysis
+	Do the above analysis for every segment and save it to a dataframe
 	"""
-	rslts
 end
+
+# ╔═╡ 85e1791d-bce2-4781-a405-699cc998ebeb
+md"""
+Description of the resulting dataframe
+"""
 
 # ╔═╡ 19804e32-0e1f-4b78-89c2-0773dbadc953
 describe(rslts)
 
-# ╔═╡ 12445917-47f5-48df-978e-44261baf27b3
-histogram(rslts.τ)
+# ╔═╡ 135cd015-4bd8-45be-938f-089dcd6f60b2
+md"""
+# Results of Analysis
+"""
 
-# ╔═╡ e1a1cb96-cc5e-42a2-9441-a973097ed3f1
-histogram(rslts.v)
+# ╔═╡ 1bf26801-5fda-42e0-9fd0-c06842adcda2
+begin
+	md"""
+	## Time Delta vs Flowrate
+	"""
+	dft_f = combine(groupby(rslts, :flow, skipmissing=true), :τ => mean, :τ => std)
+	plot(dft_f.flow, dft_f.τ_mean, yerror = dft_f.τ_std, ribbon=dft_f.τ_std,title = "timedelta vs flowrate", lw = 3, xlabel="flowrate (uL/min)", ylabel="timedelta (ms)",legend=false, xlims = (0,90), xticks = 0:5:80)
+end
+
+# ╔═╡ e6d7b508-c6ec-4cc7-b84a-a5838d80d855
+md"""
+# Regression Models
+"""
+
+# ╔═╡ 707238ed-26c5-4751-8826-12db702d582f
+begin
+	md"""
+	```math
+	\tau(v)=A+Be^{-C(v-D)}
+	```
+	"""
+	f(v, q) = @. q[1]+q[2]*ℯ^(-q[3]*v+q[4])
+	A = minimum(dft_f.τ_mean)  # Fastest flow τ would be close
+	B = maximum(dft_f.τ_mean)
+	C = 5/80 # 5 tau for decay rate, assume near total decay by 80 uL/min
+	D = 0
+	q0=[A,B,C,D]
+	tdata2 = dft_f[!,"flow"]
+	ydata2 = dft_f[!,"τ_mean"]
+	fit2 = curve_fit(f, tdata2, ydata2, q0) # fit to curve
+	τ3(v) = fit2.param[1]+fit2.param[2]*ℯ^(-fit2.param[3]*v+fit2.param[4])
+	plot(dft_f.flow, dft_f.τ_mean, yerror = dft_f.τ_std, ribbon=dft_f.τ_std,title = "timedelta vs flowrate", lw = 3, xlabel="flowrate (uL/min)", ylabel="timedelta (ms)",legend=false, xlims = (0,90), xticks = 0:5:80)
+	plot!(τ3,w=3)
+	# estimate_covar(fit2)
+end
+
+# ╔═╡ 7a8e5b65-bf84-4150-a499-9bf37495da5e
+begin
+	md"""
+	## 4-parameter model
+	Follows the optical flowsensor presented in invasive blood flow measurement.
+	Note that in the paper, this was used to relate flowrate with power, not TOF with flowrate
+	"""
+end
+
+# ╔═╡ 4b30a51b-ca76-4b48-8e33-a5a1f6ef2331
+
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -272,6 +204,7 @@ DataFramesMeta = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 LsqFit = "2fda8390-95c7-5789-9bda-21331edee243"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 WebIO = "0f1e0344-ec1d-5b48-a673-e5cf874b6c29"
 
@@ -1574,33 +1507,19 @@ version = "0.9.1+5"
 
 # ╔═╡ Cell order:
 # ╠═e858dffe-7c1b-11ec-191f-51f24d41113b
-# ╟─afbb6c88-6ce3-42f3-a9f3-24dc293d2a10
-# ╟─b685b665-c962-4d83-b0d0-110d174f17f2
-# ╟─ee973c19-b066-45ff-948f-f7e48a5bcbe9
-# ╟─4e220425-8ea1-4baf-b784-0719bbb491eb
-# ╟─8f90774c-f8ae-4413-8541-f2964f61b503
-# ╟─d80c89f7-c31b-4ffb-8254-1839fb1f7fd8
-# ╟─a5369ca7-c249-4739-beb0-0cfcbd812329
+# ╟─6534f1c8-3e19-4dea-8b5a-087ff696f819
 # ╟─674412de-8bcd-4e77-8ed3-87bc42c1823e
 # ╟─3874130f-f78f-4a74-b4f0-f8e14c4d6a11
-# ╠═d9139475-0cdb-4562-a633-0ef5fe54153d
-# ╟─2b03ffc1-aafc-4d4b-8d5d-4df444f51835
 # ╟─62e9ccf1-de1f-49b3-9962-25eb3bf03345
-# ╟─87329476-6906-4d2d-8894-b1417e7ed394
-# ╠═b5d25ce6-55e1-4606-a0d5-b3d6194753b6
-# ╠═86bc3139-968e-420e-8f62-5b645adff533
-# ╠═718d72de-81b4-4db1-b754-3ff153dc0f21
 # ╟─84d13308-81f2-4e0c-b915-df6ce710fca1
-# ╟─3f778a7e-9902-46f9-beee-b58f2d268738
-# ╠═97b156fb-f4ca-41a2-a4b6-0fab42471917
-# ╟─35aa9d12-6597-4f09-906d-e41830bceedb
-# ╠═946ba534-4139-4e2c-9a05-e6de825c6321
-# ╟─ab705671-fdde-4a93-861d-59f3b36a5c15
-# ╟─a2365c10-eba5-4638-8c2c-36001882cc07
-# ╟─12698867-6a6d-4418-b890-2486d42aa8aa
 # ╠═ff25f60d-58ea-471c-b4a9-643ec8d18e74
+# ╟─85e1791d-bce2-4781-a405-699cc998ebeb
 # ╟─19804e32-0e1f-4b78-89c2-0773dbadc953
-# ╠═12445917-47f5-48df-978e-44261baf27b3
-# ╠═e1a1cb96-cc5e-42a2-9441-a973097ed3f1
+# ╟─135cd015-4bd8-45be-938f-089dcd6f60b2
+# ╠═1bf26801-5fda-42e0-9fd0-c06842adcda2
+# ╠═e6d7b508-c6ec-4cc7-b84a-a5838d80d855
+# ╠═707238ed-26c5-4751-8826-12db702d582f
+# ╠═7a8e5b65-bf84-4150-a499-9bf37495da5e
+# ╠═4b30a51b-ca76-4b48-8e33-a5a1f6ef2331
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
