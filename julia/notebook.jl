@@ -24,7 +24,7 @@ end
 
 # ╔═╡ afbb6c88-6ce3-42f3-a9f3-24dc293d2a10
 begin
-	df = CSV.read("20_cubeide_2mm.txt", header=["time","temp","heat"], DataFrame)
+	df = CSV.read("../data/80_cubeide_2mm.txt", header=["time","temp","heat"], DataFrame)
 	dfa = @chain df begin
 		@subset((!isnan).(:temp))
 		@subset((!isnan).(:heat))
@@ -101,13 +101,8 @@ end
 
 # ╔═╡ 3874130f-f78f-4a74-b4f0-f8e14c4d6a11
 begin
-	r = 0.127 # mm
-	A = π*r^2 # mm^2
 	md"""
 	# Sensor Geometry Parameters
-	inner radius is \$$r mm \
-	so the area is \$$A mm^2
-	## distance between the heater and sensor
 	Let $x$ be the distance between the heater and sensor. It can be set as a parameter to fit. However, previous explorations showed that this was not a good idea.
 	Therefore we fix this value.
 	"""
@@ -125,7 +120,7 @@ md"""
 md"""
 The model is the following equation
 ```math
-f(t)=\frac{q}{4\pi kt} e^{-\frac{(x-vt)^2}{4at}}
+f(t)=\frac{q}{4\pi k(t+d)} e^{-\frac{(x-v(t+d))^2}{4a(t+d)}}
 ``` \
 $q$ is the pulse signal input strength \
 $x$ is the distance between the heater and the sensor in mm)\
@@ -173,18 +168,15 @@ end
 # ╔═╡ 3f778a7e-9902-46f9-beee-b58f2d268738
 md"""
 # Non-Linear Least Squares
+we use non-linear least squares to fit the parameters of the model
 """
 
-# ╔═╡ 97b156fb-f4ca-41a2-a4b6-0fab42471917
+# ╔═╡ 35aa9d12-6597-4f09-906d-e41830bceedb
 begin
 	m(t, p) = @. p[1]/(4*p[4]*π*(t+p[3]))*ℯ^(-(x-p[2]*(t+p[3]))^2/(4*p[5]*(t+p[3])))
 	p0 = [q,v,d,k,a]
 	fit = curve_fit(m, tdata, ydata, p0)
 	cov = estimate_covar(fit)
-end
-
-# ╔═╡ 35aa9d12-6597-4f09-906d-e41830bceedb
-begin
 	q1 = fit.param[1]
 	v1 = fit.param[2]
 	d1 = fit.param[3]
@@ -193,14 +185,21 @@ begin
 	a1 = fit.param[5]
 
 	md"""
-	(old q, new q): (\$$q, \$$q1) \
-	(old v, new v): (\$$v, \$$v1) \
-	(old d, new d): (\$$d, \$$d1) \
-	Fixed x at \$$x \
-	(old k, new k): (\$$k, \$$k1) \
-	(old a, new a): (\$$a, \$$a1)
+	(guess q, fitted q): (\$$q, \$$q1) \
+	(guess v, fitted v): (\$$v, \$$v1) \
+	(guess d, fitted d): (\$$d, \$$d1) \
+	(guess k, fitted k): (\$$k, \$$k1) \
+	(guess a, fitted a): (\$$a, \$$a1)
 	"""
 end
+
+# ╔═╡ c90fa4b4-c76f-40b4-a10d-7a2b7a55cb53
+md"""
+We use the fitted parameters to calculate the time-of-flight (TOF)
+```math
+τ = \frac{-2a+\sqrt{4a^2+v^2x^2}}{v^2} - d
+```
+"""
 
 # ╔═╡ 946ba534-4139-4e2c-9a05-e6de825c6321
 begin
@@ -218,23 +217,21 @@ begin
 	vline!([τ])
 end
 
-# ╔═╡ a2365c10-eba5-4638-8c2c-36001882cc07
-begin
-	md"""
-	Important variables to save (v1,x1,τ) = (\$$v1,\$$x1,\$$τ)
-	"""
-end
-
 # ╔═╡ 12698867-6a6d-4418-b890-2486d42aa8aa
 md"""
-# Repeat for all segments
-Do the above analysis for every segment and save it to a dataframe
+# Apply Analysis to All Segments
+Do the above analysis for every segment and save it to a dataframe. \
+The dataframe is shown below
 """
 
 # ╔═╡ ff25f60d-58ea-471c-b4a9-643ec8d18e74
 begin
 	rslts = DataFrame(segm=Int[], q=Float32[], v=Float32[], d=Float32[], x=Float32[], k=Float32[], a=Float32[], τ=Float32[])
 	for dfi in gd
+		dfi[:, "time"] .-= dfi[1, "time"]         # Normalize time
+		dfi[:, "temp"] .-= minimum(dfi[:,"temp"]) # Normalize temperature
+		stop_recording2 = length(dfi[:,"time"])-curtail # Control ending rate
+		dfi=dfi[1:sample_rate:stop_recording2,:]
 		tdata1 = dfi[!,"time"]
 		ydata1 = dfi[!,"temp"]
 		p1 = [q,v,d,k,a] # populate initial guesses
@@ -248,19 +245,24 @@ begin
 		τ2 = (-2*a2+sqrt(4*a2^2+v2^2*x^2))/v2^2 - d2
 		push!(rslts,(dfi[1,"segm"],q2,v2,d2,x,k2,a2,τ2))
 	end
-	md"""
-	"""
 	rslts
 end
 
 # ╔═╡ 19804e32-0e1f-4b78-89c2-0773dbadc953
+md"""
+Here's the description of that dataframe
+"""
+
+# ╔═╡ ffc0d0d8-0b83-4596-acf9-c22cb4e6b977
 describe(rslts)
+
+# ╔═╡ 31d8972e-4fe2-423b-95ac-160d3148963e
+md"""
+Shown below is the distribution of TOF
+"""
 
 # ╔═╡ 12445917-47f5-48df-978e-44261baf27b3
 histogram(rslts.τ)
-
-# ╔═╡ e1a1cb96-cc5e-42a2-9441-a973097ed3f1
-histogram(rslts.v)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1585,22 +1587,22 @@ version = "0.9.1+5"
 # ╟─3874130f-f78f-4a74-b4f0-f8e14c4d6a11
 # ╠═d9139475-0cdb-4562-a633-0ef5fe54153d
 # ╟─2b03ffc1-aafc-4d4b-8d5d-4df444f51835
-# ╟─62e9ccf1-de1f-49b3-9962-25eb3bf03345
+# ╠═62e9ccf1-de1f-49b3-9962-25eb3bf03345
 # ╟─87329476-6906-4d2d-8894-b1417e7ed394
 # ╠═b5d25ce6-55e1-4606-a0d5-b3d6194753b6
 # ╠═86bc3139-968e-420e-8f62-5b645adff533
 # ╠═718d72de-81b4-4db1-b754-3ff153dc0f21
 # ╟─84d13308-81f2-4e0c-b915-df6ce710fca1
 # ╟─3f778a7e-9902-46f9-beee-b58f2d268738
-# ╠═97b156fb-f4ca-41a2-a4b6-0fab42471917
 # ╟─35aa9d12-6597-4f09-906d-e41830bceedb
-# ╠═946ba534-4139-4e2c-9a05-e6de825c6321
+# ╟─c90fa4b4-c76f-40b4-a10d-7a2b7a55cb53
+# ╟─946ba534-4139-4e2c-9a05-e6de825c6321
 # ╟─ab705671-fdde-4a93-861d-59f3b36a5c15
-# ╟─a2365c10-eba5-4638-8c2c-36001882cc07
 # ╟─12698867-6a6d-4418-b890-2486d42aa8aa
-# ╠═ff25f60d-58ea-471c-b4a9-643ec8d18e74
+# ╟─ff25f60d-58ea-471c-b4a9-643ec8d18e74
 # ╟─19804e32-0e1f-4b78-89c2-0773dbadc953
+# ╟─ffc0d0d8-0b83-4596-acf9-c22cb4e6b977
+# ╟─31d8972e-4fe2-423b-95ac-160d3148963e
 # ╠═12445917-47f5-48df-978e-44261baf27b3
-# ╠═e1a1cb96-cc5e-42a2-9441-a973097ed3f1
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

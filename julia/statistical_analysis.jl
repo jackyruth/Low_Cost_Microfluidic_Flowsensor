@@ -64,11 +64,9 @@ end
 
 # ╔═╡ 3874130f-f78f-4a74-b4f0-f8e14c4d6a11
 begin
-	r = 0.127 # mm
 	x = 3
 	md"""
 	# Sensor Geometry Parameters
-	inner radius is \$$r mm \
 	distance between heater and sensor is \$$x mm
 	"""
 end
@@ -76,9 +74,9 @@ end
 # ╔═╡ 62e9ccf1-de1f-49b3-9962-25eb3bf03345
 md"""
 # Analytical Model
-The model is the following equation
+Perform a non-linear least square fit to the following model
 ```math
-f(t)=\frac{q}{4\pi kt} e^{-\frac{(x-vt)^2}{4at}}
+f(t)=\frac{q}{4\pi k(t+d)} e^{-\frac{(x-v(t+d))^2}{4a(t+d)}}
 ``` \
 $q$ is the pulse signal input strength \
 $x$ is the distance between the heater and the sensor in mm)\
@@ -101,6 +99,14 @@ begin
 	Use the thermal conductivity and diffusivity of water as initial guesses. Use Watt, Kelvin, Millimeters and Milliseconds as units.
 	"""
 end
+
+# ╔═╡ f8f1e8c7-bee2-46e8-8b5f-c84bb7166d06
+md"""
+After we fit the parameters, we find the time-of-flight (TOF) via the following equation
+```math
+τ = \frac{-2a+\sqrt{4a^2+v^2x^2}}{v^2}-d
+```
+"""
 
 # ╔═╡ ff25f60d-58ea-471c-b4a9-643ec8d18e74
 begin
@@ -157,42 +163,49 @@ end
 
 # ╔═╡ e6d7b508-c6ec-4cc7-b84a-a5838d80d855
 md"""
-# Regression Models
+# Regression Model
+Using some intuition about the physics of the situation, we guess the equation to be in the form.
+```math
+\tau(v)=A+Be^{-Cv}
+```
+Where the initial guesses for the parameters are \
+A is the minimum of τ (so it's at the fastest flowrate) \
+B is the maximum of τ (so it's at the slowest flowrate) \
+C is follows the 5τ rule, reaching 5τ at the fastest flowrate \
+D can be set to 0.
 """
 
 # ╔═╡ 707238ed-26c5-4751-8826-12db702d582f
 begin
-	md"""
-	```math
-	\tau(v)=A+Be^{-C(v-D)}
-	```
-	"""
-	f(v, q) = @. q[1]+q[2]*ℯ^(-q[3]*v+q[4])
+	f(v, q) = @. q[1]+q[2]*ℯ^(-q[3]*v)
 	A = minimum(dft_f.τ_mean)  # Fastest flow τ would be close
 	B = maximum(dft_f.τ_mean)
 	C = 5/80 # 5 tau for decay rate, assume near total decay by 80 uL/min
 	D = 0
-	q0=[A,B,C,D]
+	q0=[A,B,C]
 	tdata2 = dft_f[!,"flow"]
 	ydata2 = dft_f[!,"τ_mean"]
 	fit2 = curve_fit(f, tdata2, ydata2, q0) # fit to curve
-	τ3(v) = fit2.param[1]+fit2.param[2]*ℯ^(-fit2.param[3]*v+fit2.param[4])
+	τ3(v) = fit2.param[1]+fit2.param[2]*ℯ^(-fit2.param[3]*v)
 	plot(dft_f.flow, dft_f.τ_mean, yerror = dft_f.τ_std, ribbon=dft_f.τ_std,title = "timedelta vs flowrate", lw = 3, xlabel="flowrate (uL/min)", ylabel="timedelta (ms)",legend=false, xlims = (0,90), xticks = 0:5:80)
 	plot!(τ3,w=3)
 	# estimate_covar(fit2)
 end
 
-# ╔═╡ 7a8e5b65-bf84-4150-a499-9bf37495da5e
-begin
-	md"""
-	## 4-parameter model
-	Follows the optical flowsensor presented in invasive blood flow measurement.
-	Note that in the paper, this was used to relate flowrate with power, not TOF with flowrate
-	"""
-end
+# ╔═╡ dd8d294f-90cd-4ccd-8941-30117ea27b52
+md"""
+For the best accuracy, calibration with known flowrate is required. \
+Since the regression model is a 3-parameter model, at least 3 calibration points are needed, although more would be better. \
+The calibration points should span the entire range of measurement and they should be equally spaced, say at 10, 30, 50, 70 uL/min.
+"""
 
-# ╔═╡ 4b30a51b-ca76-4b48-8e33-a5a1f6ef2331
-
+# ╔═╡ 05d9162c-cde7-4618-b451-61911f11140c
+md"""
+Once the parameters are fitted, we can translate our timedelta τ into flowrate via the equation 
+```math
+v(τ)=ln[(\frac{B}{τ-A})^{1/C}]
+```
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1512,14 +1525,15 @@ version = "0.9.1+5"
 # ╟─3874130f-f78f-4a74-b4f0-f8e14c4d6a11
 # ╟─62e9ccf1-de1f-49b3-9962-25eb3bf03345
 # ╟─84d13308-81f2-4e0c-b915-df6ce710fca1
-# ╠═ff25f60d-58ea-471c-b4a9-643ec8d18e74
+# ╟─f8f1e8c7-bee2-46e8-8b5f-c84bb7166d06
+# ╟─ff25f60d-58ea-471c-b4a9-643ec8d18e74
 # ╟─85e1791d-bce2-4781-a405-699cc998ebeb
 # ╟─19804e32-0e1f-4b78-89c2-0773dbadc953
 # ╟─135cd015-4bd8-45be-938f-089dcd6f60b2
-# ╠═1bf26801-5fda-42e0-9fd0-c06842adcda2
-# ╠═e6d7b508-c6ec-4cc7-b84a-a5838d80d855
-# ╠═707238ed-26c5-4751-8826-12db702d582f
-# ╠═7a8e5b65-bf84-4150-a499-9bf37495da5e
-# ╠═4b30a51b-ca76-4b48-8e33-a5a1f6ef2331
+# ╟─1bf26801-5fda-42e0-9fd0-c06842adcda2
+# ╟─e6d7b508-c6ec-4cc7-b84a-a5838d80d855
+# ╟─707238ed-26c5-4751-8826-12db702d582f
+# ╟─dd8d294f-90cd-4ccd-8941-30117ea27b52
+# ╟─05d9162c-cde7-4618-b451-61911f11140c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
