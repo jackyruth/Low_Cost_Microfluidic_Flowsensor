@@ -165,6 +165,12 @@ begin
 	vline!([old_τ])
 end
 
+# ╔═╡ 9e0a1999-dc02-48fe-883f-003829ce5e8d
+ydata
+
+# ╔═╡ c0249e40-2b0b-4180-a47e-8439a1ffdcae
+tdata
+
 # ╔═╡ 3f778a7e-9902-46f9-beee-b58f2d268738
 md"""
 # Non-Linear Least Squares
@@ -180,7 +186,6 @@ begin
 	q1 = fit.param[1]
 	v1 = fit.param[2]
 	d1 = fit.param[3]
-	x1 = fit.param[4]
 	k1 = fit.param[4]
 	a1 = fit.param[5]
 
@@ -1576,7 +1581,7 @@ version = "0.9.1+5"
 
 # ╔═╡ Cell order:
 # ╠═e858dffe-7c1b-11ec-191f-51f24d41113b
-# ╟─afbb6c88-6ce3-42f3-a9f3-24dc293d2a10
+# ╠═afbb6c88-6ce3-42f3-a9f3-24dc293d2a10
 # ╟─b685b665-c962-4d83-b0d0-110d174f17f2
 # ╟─ee973c19-b066-45ff-948f-f7e48a5bcbe9
 # ╟─4e220425-8ea1-4baf-b784-0719bbb491eb
@@ -1592,12 +1597,14 @@ version = "0.9.1+5"
 # ╠═b5d25ce6-55e1-4606-a0d5-b3d6194753b6
 # ╠═86bc3139-968e-420e-8f62-5b645adff533
 # ╠═718d72de-81b4-4db1-b754-3ff153dc0f21
-# ╟─84d13308-81f2-4e0c-b915-df6ce710fca1
+# ╠═84d13308-81f2-4e0c-b915-df6ce710fca1
+# ╠═9e0a1999-dc02-48fe-883f-003829ce5e8d
+# ╠═c0249e40-2b0b-4180-a47e-8439a1ffdcae
 # ╟─3f778a7e-9902-46f9-beee-b58f2d268738
-# ╟─35aa9d12-6597-4f09-906d-e41830bceedb
+# ╠═35aa9d12-6597-4f09-906d-e41830bceedb
 # ╟─c90fa4b4-c76f-40b4-a10d-7a2b7a55cb53
 # ╟─946ba534-4139-4e2c-9a05-e6de825c6321
-# ╟─ab705671-fdde-4a93-861d-59f3b36a5c15
+# ╠═ab705671-fdde-4a93-861d-59f3b36a5c15
 # ╟─12698867-6a6d-4418-b890-2486d42aa8aa
 # ╟─ff25f60d-58ea-471c-b4a9-643ec8d18e74
 # ╟─19804e32-0e1f-4b78-89c2-0773dbadc953
