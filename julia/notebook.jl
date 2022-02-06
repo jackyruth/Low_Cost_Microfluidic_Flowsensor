@@ -24,7 +24,7 @@ end
 
 # ╔═╡ afbb6c88-6ce3-42f3-a9f3-24dc293d2a10
 begin
-	df = CSV.read("../data/80_cubeide_2mm.txt", header=["time","temp","heat"], DataFrame)
+	df = CSV.read("../data/40_cubeide_2mm.txt", header=["time","temp","heat"], DataFrame)
 	dfa = @chain df begin
 		@subset((!isnan).(:temp))
 		@subset((!isnan).(:heat))
@@ -154,10 +154,6 @@ begin
 	tdata = dfg[!,"time"]
 	ydata = dfg[!,"temp"]
 	## The following makes a fit
-	# q = 44
-	# d = 1000
-	# x = 3
-	# s = 0.00048
 	old_τ = (-2*a+sqrt(4*a^2+v^2*x^2))/v^2 - d
 	f(t) = @. q/(4*π*k*(t+d))*ℯ^(-(x-v*(t+d))^2/(4*a*(t+d)))
 	scatter(tdata,ydata,markersize = 5)
@@ -166,10 +162,7 @@ begin
 end
 
 # ╔═╡ 9e0a1999-dc02-48fe-883f-003829ce5e8d
-ydata
-
-# ╔═╡ c0249e40-2b0b-4180-a47e-8439a1ffdcae
-tdata
+length(ydata)
 
 # ╔═╡ 3f778a7e-9902-46f9-beee-b58f2d268738
 md"""
@@ -182,7 +175,6 @@ begin
 	m(t, p) = @. p[1]/(4*p[4]*π*(t+p[3]))*ℯ^(-(x-p[2]*(t+p[3]))^2/(4*p[5]*(t+p[3])))
 	p0 = [q,v,d,k,a]
 	fit = curve_fit(m, tdata, ydata, p0)
-	cov = estimate_covar(fit)
 	q1 = fit.param[1]
 	v1 = fit.param[2]
 	d1 = fit.param[3]
@@ -1593,13 +1585,12 @@ version = "0.9.1+5"
 # ╠═d9139475-0cdb-4562-a633-0ef5fe54153d
 # ╟─2b03ffc1-aafc-4d4b-8d5d-4df444f51835
 # ╟─62e9ccf1-de1f-49b3-9962-25eb3bf03345
-# ╟─87329476-6906-4d2d-8894-b1417e7ed394
+# ╠═87329476-6906-4d2d-8894-b1417e7ed394
 # ╠═b5d25ce6-55e1-4606-a0d5-b3d6194753b6
 # ╠═86bc3139-968e-420e-8f62-5b645adff533
 # ╠═718d72de-81b4-4db1-b754-3ff153dc0f21
 # ╠═84d13308-81f2-4e0c-b915-df6ce710fca1
 # ╠═9e0a1999-dc02-48fe-883f-003829ce5e8d
-# ╠═c0249e40-2b0b-4180-a47e-8439a1ffdcae
 # ╟─3f778a7e-9902-46f9-beee-b58f2d268738
 # ╠═35aa9d12-6597-4f09-906d-e41830bceedb
 # ╟─c90fa4b4-c76f-40b4-a10d-7a2b7a55cb53

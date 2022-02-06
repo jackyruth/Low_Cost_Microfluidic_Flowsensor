@@ -35,7 +35,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define N_MEASUREMENTS 7
+#define N_MEASUREMENTS 12
 #define N_PARAMS 5
 /* USER CODE END PD */
 
@@ -59,11 +59,10 @@ char print_data[PRINT_DATA_SIZE];
 // sample rate slider = 50
 // sample duration slider = 290
 // pulse slider = 1
-double t_data[N_MEASUREMENTS] = {0.0100002, 0.529999, 0.9, 0.799999, 0.59, 0.389999, 0.25}; // 80 uL/min
+// double t_data[N_MEASUREMENTS] = {0.0100002, 0.529999, 0.9, 0.799999, 0.59, 0.389999, 0.25}; // 80 uL/min
 //double t_data[N_MEASUREMENTS] = {0.0299988,0.0599995,0.49,0.889999,1.03,0.969999,0.82}; // 20 uL/min
 
-//double params[N_PARAMS] = {41, 0.00069, 860, 0.000598, 0.000143}; // Initial values of parameters
-double params[N_PARAMS] = {40, 0.69, 0.86, 0.598, 0.143}; // Initial values of parameters
+// double params[N_PARAMS] = {40, 0.69, 0.86, 0.598, 0.143}; // Initial values of parameters
 LMstat lmstat;
 /* USER CODE END PV */
 
@@ -89,7 +88,7 @@ static void MX_NVIC_Init(void);
  *
  * @return  temperature at the time x
  */
-double newton_func(double *p, int t, void *fdata)
+double analytical_model(double *p, int t, void *fdata)
 {
 	// p[0] = q
 	// p[1] = v
@@ -119,7 +118,7 @@ void gradient(double *g, double *p, int t, void *fdata)
  * @temp   Target temperature
  * @return Number of sample
  */
-double temp_to_time(double *p, double temp)
+double get_timedelta(double *p)
 {
     return 1000.0*((-2*p[4]+sqrt(4*pow(p[4],2)+pow(3*p[1],2)))/pow(p[1],2)-p[2]);
 }
@@ -137,7 +136,7 @@ double temp_to_time(double *p, double temp)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  uint32_t prev_time;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -169,20 +168,40 @@ int main(void)
   /* USER CODE BEGIN 2 */
   int n_iterations;
   levmarq_init(&lmstat);
-  n_iterations = levmarq(N_PARAMS, params, N_MEASUREMENTS, t_data, NULL,
-          &newton_func, &gradient, NULL, &lmstat);
-  log_info("%s","**************** End of calculation ***********************");
-  log_info("N iterations: %d", n_iterations);
-  log_info("q: %f, v: %f, d: %f, k: %f, a: %f", params[0], params[1], params[2], params[3], params[4]);
-  log_info("%s","**************** Interpolation test ***********************");
-  log_info("Result: %f ", temp_to_time(params, 50.0));
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  log_info("%s","Hello World!");
+	  // 80 uL/min
+	  // double t_data[] = {0.0100002, 0.529999, 0.9, 0.799999, 0.59, 0.389999, 0.25};
+
+	  // 60 uL/min
+	  // double t_data[] ={0.0300007, 0.51, 0.98, 0.98, 0.74, 0.530001, 0.34, 0.23, 0.15, 0.110001, 0.0500011, 0.0200005};
+
+	  // 40 uL/min
+	  double t_data[] = {0.0300007, 0.35, 1.07, 1.28, 1.12, 0.870001, 0.630001, 0.43, 0.290001, 0.18, 0.110001, 0.0699997};
+//	  double t_data[] = {0.0300007,0.0300007,0.0300007,0.110001,0.200001,0.35,0.52,0.690001,0.82,0.960001,1.07,1.16,1.21,1.26,1.28, \
+//	  1.28,1.27,1.25,1.21,1.17,1.12,1.08,1.03,0.99,0.92,0.870001,0.810001,0.77,0.720001,0.67,0.630001,0.59,0.530001, \
+//	  0.5,0.450001,0.43,0.390001,0.360001,0.32,0.300001,0.290001,0.25,0.230001,0.210001,0.190001, 0.18, 0.16,0.130001, \
+//	  0.140001,0.120001,0.110001,0.110001,0.0900002,0.0799999,0.0699997,0.0699997};
+	  // 20 uL/min
+	  // double t_data[] = {0.0299988,0.0599995, 0.49,0.889999, 1.03, 0.969999, 0.82, 0.639999, 0.49, 0.349998, 0.23, 0.16};
+
+	  //  5 uL/min
+//	  double t_data[]={0.039999,0.0199986,0.0299988,0.0900002,0.109999,0.129999, \
+//	  	  	  	   0.17,0.199999,0.209999,0.18,0.139999,0.0999985};
+	  double params[N_PARAMS] = {30, 0.5, 0.5, 0.598, 0.143}; // Initial values of parameters
+	  prev_time = HAL_GetTick();
+	  n_iterations = levmarq(N_PARAMS, params, N_MEASUREMENTS, t_data, NULL,
+	          &analytical_model, &gradient, NULL, &lmstat);
+	  prev_time = HAL_GetTick()-prev_time;
+	  log_info("%s","**************** End of calculation ***********************");
+	  log_info("N iterations: %d\t Elapsed Time: %lu ms", n_iterations,prev_time);
+	  log_info("q: %f, v: %f, d: %f, k: %f, a: %f", params[0], params[1], params[2], params[3], params[4]);
+	  log_info("%s","**************** Interpolation test ***********************");
+	  log_info("Result: %f ", get_timedelta(params));
 	  HAL_Delay(1000);
     /* USER CODE END WHILE */
 

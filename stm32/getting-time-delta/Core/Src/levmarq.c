@@ -22,10 +22,19 @@
 
 
 /* set parameters required by levmarq() to default values */
+//void levmarq_init(LMstat *lmstat)
+//{
+//  lmstat->verbose = 0;
+//  lmstat->max_it = 10000;
+//  lmstat->init_lambda = 0.0001;
+//  lmstat->up_factor = 10;
+//  lmstat->down_factor = 10;
+//  lmstat->target_derr = 1e-12;
+//}
 void levmarq_init(LMstat *lmstat)
 {
   lmstat->verbose = 0;
-  lmstat->max_it = 10000;
+  lmstat->max_it = 300;
   lmstat->init_lambda = 0.0001;
   lmstat->up_factor = 10;
   lmstat->down_factor = 10;
@@ -128,7 +137,7 @@ int levmarq(int npar, double *par, int ny, double *y, double *dysq,
   lmstat->final_err = err;
   lmstat->final_derr = derr;
 
-  return (it==nit);
+  return (it);
 }
 
 
