@@ -16,9 +16,11 @@ end
 # ╔═╡ 6534f1c8-3e19-4dea-8b5a-087ff696f819
 begin
 	flowrate_list = [5 10 15 20 25 30 35 40 50 60 70 80]
+	# flowrate_list = [5 10 15 20 25 30 35 40 50 60 70 80]
 	gdfg= DataFrame(time=Int[],temp=Float32[],heat=Int[],segm=Int[],flow=Int[])
 	for flow in flowrate_list
-		filename = "../data/"*"$flow"*"_cubeide_2mm.txt"#"_arduino_5mm.txt"
+		filename = "../pcb_data/"*"$flow"*".txt"#"_arduino_5mm.txt"
+		#filename = "../data/"*"$flow"*"_cubeide_2mm.txt"#"_arduino_5mm.txt"
 		df = CSV.read(filename, header=["time","temp","heat"], DataFrame)
 		dfa = @chain df begin
 			@subset((!isnan).(:temp))
@@ -1520,7 +1522,7 @@ version = "0.9.1+5"
 
 # ╔═╡ Cell order:
 # ╠═e858dffe-7c1b-11ec-191f-51f24d41113b
-# ╟─6534f1c8-3e19-4dea-8b5a-087ff696f819
+# ╠═6534f1c8-3e19-4dea-8b5a-087ff696f819
 # ╟─674412de-8bcd-4e77-8ed3-87bc42c1823e
 # ╟─3874130f-f78f-4a74-b4f0-f8e14c4d6a11
 # ╟─62e9ccf1-de1f-49b3-9962-25eb3bf03345
