@@ -54,7 +54,7 @@ TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
 char print_data[PRINT_DATA_SIZE];
-static const uint8_t TMP117_ADDR = 0x4B << 1;
+static const uint8_t TMP117_ADDR = 0x4A << 1;
 static const uint8_t BROADCAST_ADDR = 0x00 << 1;
 static const uint8_t REG_TEMP = 0x00;
 static const uint8_t REG_CONF = 0x01;

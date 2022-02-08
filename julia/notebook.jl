@@ -24,7 +24,7 @@ end
 
 # ╔═╡ afbb6c88-6ce3-42f3-a9f3-24dc293d2a10
 begin
-	df = CSV.read("../pcb_data/10_far.txt", header=["time","temp","heat"], DataFrame)
+	df = CSV.read("../pcb_data/80_far.txt", header=["time","temp","heat"], DataFrame)
 	dfa = @chain df begin
 		@subset((!isnan).(:temp))
 		@subset((!isnan).(:heat))
@@ -76,7 +76,7 @@ md"""
 """
 
 # ╔═╡ 8f90774c-f8ae-4413-8541-f2964f61b503
-@bind curtail Slider(50:20:400,show_value=true)  # Control processing time
+@bind curtail Slider(0:20:400,show_value=true)  # Control processing time
 
 # ╔═╡ d80c89f7-c31b-4ffb-8254-1839fb1f7fd8
 md"""
@@ -148,7 +148,7 @@ end
 
 # ╔═╡ 718d72de-81b4-4db1-b754-3ff153dc0f21
 # @bind v Slider(1E-5:1E-5:1E-3,show_value=true)
-@bind v Slider(1E-7:1E-7:1E-3,show_value=true)
+@bind v Slider(1E-4:1E-4:1E-3,show_value=true)
 
 # ╔═╡ 84d13308-81f2-4e0c-b915-df6ce710fca1
 begin
@@ -163,7 +163,7 @@ begin
 end
 
 # ╔═╡ 9e0a1999-dc02-48fe-883f-003829ce5e8d
-length(ydata)
+ydata
 
 # ╔═╡ 3f778a7e-9902-46f9-beee-b58f2d268738
 md"""
@@ -1577,7 +1577,7 @@ version = "0.9.1+5"
 # ╠═afbb6c88-6ce3-42f3-a9f3-24dc293d2a10
 # ╟─b685b665-c962-4d83-b0d0-110d174f17f2
 # ╠═ee973c19-b066-45ff-948f-f7e48a5bcbe9
-# ╟─4e220425-8ea1-4baf-b784-0719bbb491eb
+# ╠═4e220425-8ea1-4baf-b784-0719bbb491eb
 # ╟─8f90774c-f8ae-4413-8541-f2964f61b503
 # ╟─d80c89f7-c31b-4ffb-8254-1839fb1f7fd8
 # ╟─a5369ca7-c249-4739-beb0-0cfcbd812329

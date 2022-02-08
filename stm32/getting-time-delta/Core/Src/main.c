@@ -35,8 +35,15 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define N_MEASUREMENTS 12
+#define N_MEASUREMENTS 13
 #define N_PARAMS 5
+
+//#define A_CONST 3067.85
+//#define B_CONST 8360.51
+//#define C_CONST 0.0308373
+#define A_CONST 2366.09
+#define B_CONST 4150.07
+#define C_CONST 0.0320124
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -55,14 +62,6 @@ TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
 char print_data[PRINT_DATA_SIZE];
-
-// sample rate slider = 50
-// sample duration slider = 290
-// pulse slider = 1
-// double t_data[N_MEASUREMENTS] = {0.0100002, 0.529999, 0.9, 0.799999, 0.59, 0.389999, 0.25}; // 80 uL/min
-//double t_data[N_MEASUREMENTS] = {0.0299988,0.0599995,0.49,0.889999,1.03,0.969999,0.82}; // 20 uL/min
-
-// double params[N_PARAMS] = {40, 0.69, 0.86, 0.598, 0.143}; // Initial values of parameters
 LMstat lmstat;
 /* USER CODE END PV */
 
@@ -122,6 +121,17 @@ double get_timedelta(double *p)
 {
     return 1000.0*((-2*p[4]+sqrt(4*pow(p[4],2)+pow(3*p[1],2)))/pow(p[1],2)-p[2]);
 }
+/*
+ * @brief  Function for transforming timedelta to flowrate, provide 2 decimal places
+ *
+ * @par    Parameters from Newton equation
+ * @temp   Target temperature
+ * @return Number of sample
+ */
+double get_flowrate(double td)
+{
+    return log(pow(B_CONST/(td-A_CONST),1/C_CONST));
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -174,34 +184,46 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  // 80 uL/min
-	  // double t_data[] = {0.0100002, 0.529999, 0.9, 0.799999, 0.59, 0.389999, 0.25};
+	  //  5 uL/min (output:  5.18)
+	  // double t_data[] = {0.0499992,0.0299988,0.15,0.32,0.469999,0.549999,0.58,0.529999,0.449999,0.359999,0.259998,0.15,0.0299988};
+	  // 10 uL/min (output:  7.22)
+	  // double t_data[] = {0.0400009,0.0200005,0.219999,0.52,0.75,0.879999,0.889999,0.83,0.74,0.59,0.469999,0.33,0.219999};
+	  // 20 uL/min (output: 20.22)
+	  // double t_data[] = {0.219999,0.23,0.73,1.23,1.39,1.35,1.2,0.98,0.73,0.52,0.32,0.15,0.0};
+	  // 30 uL/min (output: 31.07)
+	  // double t_data[] = {0.0599995,0.23,0.950001,1.45,1.59,1.41,1.16,0.889999,0.639999,0.440001,0.27,0.130001,0.0200005};
+	  // 40 uL/min (output: 42.25)
+	  // double t_data[] = {0.129999,0.49,1.43,1.86,1.79,1.52,1.21,0.92,0.66,0.459999,0.289999,0.139999,0.0};
+	  // 50 uL/min (output: 52.93)
+	  // double t_data[] = {0.0,0.49,1.43,1.75,1.6,1.31,1.02,0.75,0.529999,0.359999,0.23,0.119999,0.0299988};
+	  // 60 uL/min (output: 58.67)
+	  double t_data[] = {0.0,0.57,1.45,1.69,1.51,1.22,0.93,0.709999,0.5,0.34,0.209999,0.109999,0.0};
+	  // 70 uL/min (output: 64.03)
+	  // double t_data[] = {0.0799999,0.65,1.46,1.62,1.43,1.12,0.85,0.630001,0.440001,0.300001,0.190001,0.0900002,0.0100002};
+	  // 80 uL/min (output: 70.56)
+	  // double t_data[] = {0.32,0.870001,1.59,1.66,1.42,1.11,0.82,0.610001,0.43, 0.290001,0.18,0.0799999,0.0100002};
 
-	  // 60 uL/min
-	  // double t_data[] ={0.0300007, 0.51, 0.98, 0.98, 0.74, 0.530001, 0.34, 0.23, 0.15, 0.110001, 0.0500011, 0.0200005};
-
-	  // 40 uL/min
-	  double t_data[] = {0.0300007, 0.35, 1.07, 1.28, 1.12, 0.870001, 0.630001, 0.43, 0.290001, 0.18, 0.110001, 0.0699997};
-//	  double t_data[] = {0.0300007,0.0300007,0.0300007,0.110001,0.200001,0.35,0.52,0.690001,0.82,0.960001,1.07,1.16,1.21,1.26,1.28, \
-//	  1.28,1.27,1.25,1.21,1.17,1.12,1.08,1.03,0.99,0.92,0.870001,0.810001,0.77,0.720001,0.67,0.630001,0.59,0.530001, \
-//	  0.5,0.450001,0.43,0.390001,0.360001,0.32,0.300001,0.290001,0.25,0.230001,0.210001,0.190001, 0.18, 0.16,0.130001, \
-//	  0.140001,0.120001,0.110001,0.110001,0.0900002,0.0799999,0.0699997,0.0699997};
-	  // 20 uL/min
-	  // double t_data[] = {0.0299988,0.0599995, 0.49,0.889999, 1.03, 0.969999, 0.82, 0.639999, 0.49, 0.349998, 0.23, 0.16};
-
-	  //  5 uL/min
-//	  double t_data[]={0.039999,0.0199986,0.0299988,0.0900002,0.109999,0.129999, \
-//	  	  	  	   0.17,0.199999,0.209999,0.18,0.139999,0.0999985};
-	  double params[N_PARAMS] = {30, 0.5, 0.5, 0.598, 0.143}; // Initial values of parameters
+	  // 40 uL/min Far Sensor (output: 42.80)
+	  // double t_data[] = {0.0799999,0.0200005,0.15,0.440001,0.67,0.74,0.719999,0.630001,0.52,0.41,0.280001,0.16,0.0699997};
+	  // 50 uL/min Far Sensor (output: 46.55)
+	  // double t_data[] = {0.0699997,0.00999832,0.219999,0.549999,0.769999,0.83,0.769999,0.679998,0.529999,0.389999,0.259998,0.15,0.039999};
+	  // 60 uL/min Far Sensor (output: 56.82)
+	  // double t_data[] = {0.18,0.120001,0.42,0.76,0.880001,0.84,0.720001,0.59,0.440001,0.320002,0.200001,0.1,0.0};
+	  // 70 uL/min Far Sensor (output: 69.94)
+	  // double t_data[] = {0.039999,0.0999985,0.509998,0.82,0.889999,0.83,0.699999,0.58,0.439999,0.309999,0.219999,0.109999,0.039999};
+	  // 80 uL/min Far Sensor (output: 75.88)
+	  // double t_data[] = {0.0500011,0.110001,0.550001,0.84,0.91,0.82,0.690001,0.540001,0.41,0.300001,0.200001,0.120001,0.0500011};
+	  double params[N_PARAMS] = {30, 0.5, 1, 0.598, 0.143}; // Initial values of parameters
 	  prev_time = HAL_GetTick();
 	  n_iterations = levmarq(N_PARAMS, params, N_MEASUREMENTS, t_data, NULL,
 	          &analytical_model, &gradient, NULL, &lmstat);
 	  prev_time = HAL_GetTick()-prev_time;
+	  log_info("%s","\n\n");
 	  log_info("%s","**************** End of calculation ***********************");
 	  log_info("N iterations: %d\t Elapsed Time: %lu ms", n_iterations,prev_time);
 	  log_info("q: %f, v: %f, d: %f, k: %f, a: %f", params[0], params[1], params[2], params[3], params[4]);
 	  log_info("%s","**************** Interpolation test ***********************");
-	  log_info("Result: %f ", get_timedelta(params));
+	  log_info("Result: %.2f uL/min w timdelta %.2f ms", get_flowrate(get_timedelta(params)),get_timedelta(params));
 	  HAL_Delay(1000);
     /* USER CODE END WHILE */
 

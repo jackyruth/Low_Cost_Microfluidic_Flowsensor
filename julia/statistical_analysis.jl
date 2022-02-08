@@ -15,11 +15,11 @@ end
 
 # ╔═╡ 6534f1c8-3e19-4dea-8b5a-087ff696f819
 begin
-	flowrate_list = [5 10 15 20 25 30 35 40 50 60 70 80]
+	flowrate_list = [40 50 60 70 80]
 	# flowrate_list = [5 10 15 20 25 30 35 40 50 60 70 80]
 	gdfg= DataFrame(time=Int[],temp=Float32[],heat=Int[],segm=Int[],flow=Int[])
 	for flow in flowrate_list
-		filename = "../pcb_data/"*"$flow"*".txt"#"_arduino_5mm.txt"
+		filename = "../pcb_data/"*"$flow"*"_far.txt"#"_arduino_5mm.txt"
 		#filename = "../data/"*"$flow"*"_cubeide_2mm.txt"#"_arduino_5mm.txt"
 		df = CSV.read(filename, header=["time","temp","heat"], DataFrame)
 		dfa = @chain df begin
@@ -57,8 +57,8 @@ end
 
 # ╔═╡ 674412de-8bcd-4e77-8ed3-87bc42c1823e
 begin
-	sample_rate = 1 # 20
-	curtail = 50     # 100
+	sample_rate = 50 # 20
+	curtail = 0     # 100
 	md"""
 	Set sample rate ($sample_rate) and sample duration (\$$curtail)
 	"""
@@ -94,7 +94,7 @@ begin
 	## The following makes a fit
 	k=0.598/1000 # watt per millimeter kelvin
 	a=0.143/1000 # millimeter^2 per millisecond
-	q = 40
+	q = 30
 	d = 1000
 	v = 0.0005
 	md"""
@@ -208,6 +208,9 @@ Once the parameters are fitted, we can translate our timedelta τ into flowrate 
 v(τ)=ln[(\frac{B}{τ-A})^{1/C}]
 ```
 """
+
+# ╔═╡ 689cb8ea-60d2-4134-9259-88f586efdd4d
+[fit2.param[1],fit2.param[2],fit2.param[3]]
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1523,10 +1526,10 @@ version = "0.9.1+5"
 # ╔═╡ Cell order:
 # ╠═e858dffe-7c1b-11ec-191f-51f24d41113b
 # ╠═6534f1c8-3e19-4dea-8b5a-087ff696f819
-# ╟─674412de-8bcd-4e77-8ed3-87bc42c1823e
-# ╟─3874130f-f78f-4a74-b4f0-f8e14c4d6a11
+# ╠═674412de-8bcd-4e77-8ed3-87bc42c1823e
+# ╠═3874130f-f78f-4a74-b4f0-f8e14c4d6a11
 # ╟─62e9ccf1-de1f-49b3-9962-25eb3bf03345
-# ╟─84d13308-81f2-4e0c-b915-df6ce710fca1
+# ╠═84d13308-81f2-4e0c-b915-df6ce710fca1
 # ╟─f8f1e8c7-bee2-46e8-8b5f-c84bb7166d06
 # ╟─ff25f60d-58ea-471c-b4a9-643ec8d18e74
 # ╟─85e1791d-bce2-4781-a405-699cc998ebeb
@@ -1534,8 +1537,9 @@ version = "0.9.1+5"
 # ╟─135cd015-4bd8-45be-938f-089dcd6f60b2
 # ╟─1bf26801-5fda-42e0-9fd0-c06842adcda2
 # ╟─e6d7b508-c6ec-4cc7-b84a-a5838d80d855
-# ╟─707238ed-26c5-4751-8826-12db702d582f
+# ╠═707238ed-26c5-4751-8826-12db702d582f
 # ╟─dd8d294f-90cd-4ccd-8941-30117ea27b52
 # ╟─05d9162c-cde7-4618-b451-61911f11140c
+# ╠═689cb8ea-60d2-4134-9259-88f586efdd4d
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
