@@ -15,12 +15,11 @@ end
 
 # ╔═╡ 6534f1c8-3e19-4dea-8b5a-087ff696f819
 begin
-	flowrate_list = [40 50 60 70 80]
-	# flowrate_list = [5 10 15 20 25 30 35 40 50 60 70 80]
+	# flowrate_list = [40 50 60 70 80]
+	flowrate_list = [5 10 15 20 25 30 35 40 50 60 70 80]
 	gdfg= DataFrame(time=Int[],temp=Float32[],heat=Int[],segm=Int[],flow=Int[])
 	for flow in flowrate_list
-		filename = "../pcb_data/"*"$flow"*"_far.txt"#"_arduino_5mm.txt"
-		#filename = "../data/"*"$flow"*"_cubeide_2mm.txt"#"_arduino_5mm.txt"
+		filename = "../data/pcb_data/"*"$flow"*".txt"#"_arduino_5mm.txt"
 		df = CSV.read(filename, header=["time","temp","heat"], DataFrame)
 		dfa = @chain df begin
 			@subset((!isnan).(:temp))
