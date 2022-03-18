@@ -24,7 +24,7 @@ end
 
 # ╔═╡ afbb6c88-6ce3-42f3-a9f3-24dc293d2a10
 begin
-	df = CSV.read("../data/pcb_data/40.txt", header=["time","temp","heat"], DataFrame)
+	df = CSV.read("../data/syringe_pump_data/40.txt", header=["time","temp","heat"], DataFrame)
 	dfa = @chain df begin
 		@subset((!isnan).(:temp))
 		@subset((!isnan).(:heat))
@@ -158,8 +158,8 @@ begin
 	old_τ = (-2*a+sqrt(4*a^2+v^2*x^2))/v^2 - d
 	f(t) = @. q/(4*π*k*(t+d))*ℯ^(-(x-v*(t+d))^2/(4*a*(t+d)))
 	scatter(tdata,ydata,markersize = 5,yaxis = "Temperature (C)",xaxis="Time (ms)",title="Temperature vs Time at Sensor #1", label = "raw data")
-	# plot!(f,w=3)
-	# vline!([old_τ])
+	plot!(f,w=3)
+	vline!([old_τ])
 end
 
 # ╔═╡ 9e0a1999-dc02-48fe-883f-003829ce5e8d

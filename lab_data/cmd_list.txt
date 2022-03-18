@@ -1,0 +1,9 @@
+1. Change flowrate
+2. minicom -D /dev/ttyACM0
+3. Wait until reading is expected
+4. ctrl+A, then x to exit
+5. python3 -m serial.tools.miniterm /dev/ttyACM0 115200 > <flowrate>.txt
+	example: if you set 10uL/min, 10.txt
+6. Wait for 3 mins
+7. Exit by ctrl + ]
+8. Repeat (5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80)
