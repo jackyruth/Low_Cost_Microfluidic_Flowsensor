@@ -58,22 +58,22 @@ begin
 		else
 			maxdiff = flow-min
 		end
-		push!(err_matrix,(abs_err=maxdiff,measurement_err=maxdiff/flow,fullscale_err=maxdiff/80,flow))
+		push!(err_matrix,(abs_err=maxdiff,measurement_err=100*maxdiff/flow,fullscale_err=100*maxdiff/80,flow))
 	end
 	describe(err_matrix)
 end
 
+# ╔═╡ 07010e52-192d-4118-bd86-14b9223fa9d8
+plot(err_matrix.flow,err_matrix.measurement_err,title = "%Error of Measured Value", lw = 3, xlabel="Flowrate (uL/min)", ylabel="%Error of Measured Value",legend=false,ylim=[0,20],xlims = (5,80), xticks = 0:5:80,)
+
 # ╔═╡ bb8268a1-ab69-4338-8d2f-2682049bbbff
 plot(err_matrix.flow,err_matrix.abs_err,title = "Absolute Error", lw = 3, xlabel="Flowrate (uL/min)", ylabel="Absolute Error (uL/min)",legend=false,xlims = (5,80), xticks = 0:5:80)
 
-# ╔═╡ 07010e52-192d-4118-bd86-14b9223fa9d8
-plot(err_matrix.flow,err_matrix.measurement_err,title = "%Error of Measured Value", lw = 3, xlabel="Flowrate (uL/min)", ylabel="Absolute Error (uL/min)",legend=false,ylim=[0,0.2],xlims = (5,80), xticks = 0:5:80,)
-
 # ╔═╡ 8a2aa4bf-7386-4f9e-9bd7-f6e3b12caf2f
 begin
-	plot(err_matrix.flow,err_matrix.fullscale_err,title = "%Error of Full Scale", lw = 3, xlabel="Flowrate (uL/min)", ylabel="%Error Over Full Scale",legend=false,ylim=[0,0.2],xlims = (5,80), xticks = 0:5:80,)
+	plot(err_matrix.flow,err_matrix.fullscale_err,title = "%Error of Full Scale", lw = 3, xlabel="Flowrate (uL/min)", ylabel="%Error Over Full Scale",legend=false,ylim=[0,20],xlims = (5,80), xticks = 0:5:80,)
 	x=[5,55,80]
-	y=[0.05,0.05,0.18]
+	y=[5,5,18]
 	plot!(x,y,l=5)
 end
 
@@ -83,7 +83,7 @@ Of these results the simplist one to understand is %Error of Full Scale. We'll g
 """
 
 # ╔═╡ a9fc45a2-4aba-49f2-8f3b-43e164d58b13
-plot(x,y,l=5,title = "%Error of Full Scale", lw = 3, xlabel="Flowrate (uL/min)", ylabel="%Error Over Full Scale",legend=false,ylim=[0,0.2],xlims = (5,80), xticks = 0:5:80)
+plot(x,y,l=5,title = "%Error of Full Scale", lw = 3, xlabel="Flowrate (uL/min)", ylabel="%Error Over Full Scale",legend=false,ylim=[0,20],xlims = (5,80), xticks = 0:5:80)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1429,6 +1429,6 @@ version = "0.9.1+5"
 # ╠═bb8268a1-ab69-4338-8d2f-2682049bbbff
 # ╠═8a2aa4bf-7386-4f9e-9bd7-f6e3b12caf2f
 # ╟─953afc68-d57f-42a3-b614-ec2b78ac22c2
-# ╟─a9fc45a2-4aba-49f2-8f3b-43e164d58b13
+# ╠═a9fc45a2-4aba-49f2-8f3b-43e164d58b13
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
