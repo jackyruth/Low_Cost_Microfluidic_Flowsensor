@@ -6,6 +6,12 @@
 - Non-invasive! Wet components are standard 1/32' OD tygon tubing and 29G stainless steel
 - Simple Interface! UART Outputs every 15 seconds
 
+This project is also well documented:
+- 'Flowsensor Product Specification.pdf': Datasheet for the flowsensor
+- 'Flowsensor Requirements, Design & Verification.pdf': A document describing the requirements, design and verification of the flowsensor
+- 'flowsensor_demonstration.MOV': A video showing the benchmarking process
+- 'UBC_BioMEMS_Product_Video.mp4': A video describing the context of the system the flowsensor is originally designed to be a part of.
+
 
 ## Project Tree
 ```
