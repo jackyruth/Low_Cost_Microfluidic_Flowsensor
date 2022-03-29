@@ -1,7 +1,7 @@
 # Low Cost Flowsensor
 ## Description
-- Does the Job! Measures from up to 80 uL/min
-- Cheap! Has a BOM cost of < 30CAD
+- Does the Job! Measures up to 80 uL/min
+- Cheap! Has a BOM cost < 30CAD
 - Accurate! 5% Median Accuracy < 55 uL/min, 10-18% Median Accuracy > 55uL/min
 - Non-invasive! Wet components are standard 1/32' OD tygon tubing and 29G stainless steel
 - Simple Interface! UART Outputs every 15 seconds
