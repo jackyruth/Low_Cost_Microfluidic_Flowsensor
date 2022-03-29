@@ -16,9 +16,11 @@ end
 # ╔═╡ a936dfa5-f219-4926-bacb-5b2e2db27752
 begin
 	flowrate_list = [5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80]
+	# flowrate_list = [10 20 30 40 50 60 70 80]
 	gdfg= DataFrame(flowrate=Float32[],flow=Int32[])
 	for flow in flowrate_list
 		filename = "../lsi_lab_validation/"*"$flow"*".txt"
+		# filename = "../reagent_compatibility/40C_Water/"*"$flow"*".txt"
 		df = CSV.read(filename, header=["flowrate"], DataFrame)
 		dfa = @chain df begin
 			@subset((!isnan).(:flowrate))
@@ -30,15 +32,18 @@ begin
 	end
 	gd = groupby(gdfg, :flow, skipmissing=true)
 	md"""
-	# Benchmarking
+	# LSI Benchmarking
 	Import data into a grouped dataframe
 	"""
 end
 
+# ╔═╡ 8d59dcae-e295-4ab2-8d62-82abb4183365
+title_string = "LSI DDW Benchmarking"
+
 # ╔═╡ 346e8136-734e-4911-b0b4-9b30b3e7954c
 let
 	f(x)=x
-	plot(f, title = "Sensirion SLI-0430 vs Low Cost Flowsensor", lw = 3, xlabel="SLI-0430 flowrate (uL/min)", ylabel="Low Cost Flowsensor (uL/min)",legend=false,l=3,xlims = (0,100), xticks = 0:5:80, ylims = (0,100), yticks = 0:5:80)
+	plot(f, title=title_string, lw = 3, xlabel="Set flowrate (uL/min)", ylabel="Low Cost Flowsensor (uL/min)",legend=false,l=3,xlims = (0,100), xticks = 0:5:80, ylims = (0,100), yticks = 0:5:80)
 	for dfg in gd
 		scatter!(dfg.flow,dfg.flowrate)
 	end
@@ -64,14 +69,19 @@ begin
 end
 
 # ╔═╡ 07010e52-192d-4118-bd86-14b9223fa9d8
-plot(err_matrix.flow,err_matrix.measurement_err,title = "%Error of Measured Value", lw = 3, xlabel="Flowrate (uL/min)", ylabel="%Error of Measured Value",legend=false,ylim=[0,20],xlims = (5,80), xticks = 0:5:80,)
+let
+	plot(err_matrix.flow,err_matrix.measurement_err,title = title_string, lw = 3, xlabel="Flowrate (uL/min)", ylabel="Accuracy (%of measured value)",legend=false,ylim=[0,25],xlims = (5,80), xticks = 0:5:80,)
+	x=[15,70,80]
+	y=[12,12,20]
+	plot!(x,y,l=5)
+end
 
-# ╔═╡ bb8268a1-ab69-4338-8d2f-2682049bbbff
-plot(err_matrix.flow,err_matrix.abs_err,title = "Absolute Error", lw = 3, xlabel="Flowrate (uL/min)", ylabel="Absolute Error (uL/min)",legend=false,xlims = (5,80), xticks = 0:5:80)
+# ╔═╡ 5d434025-c0ae-4b49-b43b-ddc3af470ae6
+plot([15,70,80],[12,12,20],l=5,title = title_string, lw = 3, xlabel="Flowrate (uL/min)", ylabel="Accuracy (%of measured value)",legend=false,ylim=[0,20],xlims = (5,80), xticks = 0:5:80)
 
 # ╔═╡ 8a2aa4bf-7386-4f9e-9bd7-f6e3b12caf2f
 begin
-	plot(err_matrix.flow,err_matrix.fullscale_err,title = "%Error of Full Scale", lw = 3, xlabel="Flowrate (uL/min)", ylabel="%Error Over Full Scale",legend=false,ylim=[0,20],xlims = (5,80), xticks = 0:5:80,)
+	plot(err_matrix.flow,err_matrix.fullscale_err,title = title_string, lw = 3, xlabel="Flowrate (uL/min)", ylabel="Accuracy (%of full scale)",legend=false,ylim=[0,20],xlims = (5,80), xticks = 0:5:80,)
 	x=[5,55,80]
 	y=[5,5,18]
 	plot!(x,y,l=5)
@@ -83,7 +93,7 @@ Of these results the simplist one to understand is %Error of Full Scale. We'll g
 """
 
 # ╔═╡ a9fc45a2-4aba-49f2-8f3b-43e164d58b13
-plot(x,y,l=5,title = "%Error of Full Scale", lw = 3, xlabel="Flowrate (uL/min)", ylabel="%Error Over Full Scale",legend=false,ylim=[0,20],xlims = (5,80), xticks = 0:5:80)
+plot(x,y,l=5,title = title_string, lw = 3, xlabel="Flowrate (uL/min)", ylabel="Accuracy (%of full scale)",legend=false,ylim=[0,20],xlims = (5,80), xticks = 0:5:80)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1423,10 +1433,11 @@ version = "0.9.1+5"
 # ╔═╡ Cell order:
 # ╠═c2b9ea30-727a-47d1-a6fc-65183bbceb54
 # ╠═a936dfa5-f219-4926-bacb-5b2e2db27752
+# ╠═8d59dcae-e295-4ab2-8d62-82abb4183365
 # ╠═346e8136-734e-4911-b0b4-9b30b3e7954c
 # ╠═c4265a04-2729-463c-8dd6-1ea450e2fd39
 # ╠═07010e52-192d-4118-bd86-14b9223fa9d8
-# ╠═bb8268a1-ab69-4338-8d2f-2682049bbbff
+# ╠═5d434025-c0ae-4b49-b43b-ddc3af470ae6
 # ╠═8a2aa4bf-7386-4f9e-9bd7-f6e3b12caf2f
 # ╟─953afc68-d57f-42a3-b614-ec2b78ac22c2
 # ╠═a9fc45a2-4aba-49f2-8f3b-43e164d58b13
