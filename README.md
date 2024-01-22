@@ -1,5 +1,5 @@
 # Low Cost Flowsensor
-https://github.com/jackyruth/Low_Cost_Microfluidic_Flowsensor/assets/32418878/62e07f6d-2dad-415f-953b-cadd57041e67
+https://github.com/jackyruth/Low_Cost_Microfluidic_Flowsensor/blob/main/UBC_BioMEMS_Product_Video_annotated.mp4
 
 ## Description
 - Does the Job! Measures up to 80 uL/min
