@@ -33,3 +33,6 @@ This project is also well documented:
 - 'pcb_v1' contains a KiCAD PCB project of the flowsensor
 - 'reagent_compatibility' contains benchmarking data where we ran different reagents, some at different temperatures, through the flowsensor
 - 'stm32' contains the firmware for the flowsensor
+
+# License
+The hardware design is licensed under CERN-OHL-P-2.0. All other components are licensed under Apache-2.0.
